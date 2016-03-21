@@ -1,6 +1,7 @@
 call plug#begin('~/.vim/plugged')
 
 Plug 'altercation/vim-colors-solarized'
+Plug 'amperser/proselint'
 Plug 'bufexplorer.zip'
 Plug 'davidhalter/jedi-vim'
 Plug 'editorconfig/editorconfig-vim'
