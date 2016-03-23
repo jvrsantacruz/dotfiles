@@ -264,10 +264,10 @@ nmap <leader>h :TagbarToggle<CR>
 let g:tagbar_autofocus = 1
 
 " Cleanup trailing spaces
-map <leader>b :%s/\s\+$//g<CR>
+map <leader>cs :%s/\s\+$//g<CR>
 
 " Spaces for tabs
-map <leader>b :%s/\s\+$//g<CR>
+map <leader>ct :%s/\t/    /g<CR>
 
 " Read file under cursor
 map <cf> :read <cfile>
