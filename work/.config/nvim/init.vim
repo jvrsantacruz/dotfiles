@@ -43,72 +43,62 @@ endif
 
 """ Settings
 
-" Load plugins based on file type
-filetype plugin indent on
+" Compatibility
+set nocompatible               " Drop vi backwards compatibility
+filetype plugin indent on      " Load plugins based on file type
+syntax on                      " Enable syntax highlighting
 
-" Avoid menu in gvim
-set guioptions=
+"" Visual stuff
+set guioptions=                " Remove all menu in gvim
+set laststatus                 " Always show statusline
+set display=lastline           " Show last line as much as possible
+set ttyfast                    " Allow for faster redrawing
+set lazyredraw                 " Avoid sticky cursor and slow scrolling
+set number                     " show line numbers
+set cursorline                 " Highlight current line
+set showmode                   " Show current mode
+set showcmd                    " Show already typed keys in commands
+set showmatch                  " Show matching parenthesis
+set title                      " Set terminal title to filename
+set visualbell                 " please DONT BEEP
+set noerrorbells               " please DONT BEEP
 
-" Avoid vi weird compatibility issues
-set nocompatible | filetype indent on | syn on
-set encoding=utf-8
-
-" Makes you able to hide buffers without closing them
-set hidden
-
-" Highlight current line
-set cursorline
-
-" Avoid sticky cursor and slow scrolling
-set lazyredraw
-
-" Avoid uncontrolled swap files over the house
-set backupdir=~/.swap-vim
-
-" Enable mouse use
-set mouse=a
-
-" Path autocompletion
-set wildmode=longest,list ",full
-set wildmenu
-
+"" Encoding
 set encoding=utf-8
 setglobal fileencoding=utf-8
 set fileencodings=utf-8,latin1
 
-""" Basic things
-set number     " show line numbers
-set nowrap     " do not wrap long lines and scroll horizontally
-set tabstop=4  " tab is four spaces
-set autoindent " always autoindent
-set copyindent " copy previous indentation on autoindenting
-set smarttab   " insert tabs at start of a line according to shiftwidth and not tabstop
-set shiftwidth=4 " number of spaces for autoindenting
-set shiftround  " use a multiple of shiftwidth when indenting using '<' and '>'
-set showmatch  " show matching parenthesis
-set ignorecase " ignore case when searching
-set smartcase  " ignore case if search pattern is all lowercase
-set hlsearch   " highlight search terms
-set incsearch  " show search while you type pattern
-set backspace=indent,eol,start
-               " backspace over everything in insert mode
+"" Editing
+set nowrap         " do not wrap long lines and scroll horizontally
+set autoindent     " always autoindent
+set copyindent     " copy previous indentation on autoindenting
+set smarttab       " insert tabs at start of a line according to shiftwidth and not tabstop
+set tabstop=4      " tab is four spaces
+set softtabstop=4  " Tab indents 4 spaces
+set shiftwidth=4   " number of spaces for autoindenting
+set shiftround     " use a multiple of shiftwidth when indenting using '<' and '>'
+set expandtab
+set hidden                     " hide buffers without closing them
+set backspace=indent,eol,start  " backspace over everything in insert mode
+set textwidth=79    " Default text width to 80 chars
+set colorcolumn=79  " Show visual textwidth limit
 
+"" Searching
+set ignorecase     " ignore case when searching
+set smartcase      " ignore case if search pattern is all lowercase
+set hlsearch       " highlight search terms
+set incsearch      " show search while you type pattern
+set wildmode=longest,list  " Path autocompletion
+set wildmenu
+" ignore temp files when browsing
+set wildignore=*.swp,*.bak,*.pyc,*.class,bower_components,node_modules
+
+"" History
 set history=1000 " remember commands and search history up to 1000
 set undolevels=1000
-set wildignore=*.swp,*.bak,*.pyc,*.class,bower_components,node_modules
-                 " ignore temp files when browsing
-set title  " change terminal title to the file its beeing edited
-set visualbell   " please DONT BEEP
-set noerrorbells " please DONT BEEP
-"set mouse=a      " enable mouse for selecting, scrolling... not for terminal
-
-" Do not save backup file while editing
-set nowritebackup
 
 """ Colors
-syntax enable
 set t_Co=256
-
 set background=light
 color solarized
 
@@ -118,25 +108,17 @@ highlight PmenuSel ctermfg=0 ctermbg=7
 highlight PmenuSbar ctermfg=7 ctermbg=0
 highlight PmenuThumb ctermfg=0 ctermbg=7
 
-" Tab expanding to 4
-autocmd filetype * set expandtab
-autocmd filetype * set tabstop=4
 
-" Cambiar los colores spara BadSpell y que no se mate con los strings
-" Fondo a rojo, letras a blanco
+" Change BadSpell highlight red background, white letters
 highlight SpellBad term=standout ctermbg=1 ctermfg=7 guifg=White guibg=LightRed
 
 " Avoid bad whitespace
-autocmd filetype * set list  " show invisible spaces, tabulators and the end of lines as #
-autocmd filetype * set listchars=tab:>·,trail:·,extends:#,nbsp:·
-autocmd filetype * highlight BadWhitespace ctermbg=red guibg=red
-autocmd filetype * match BadWhitespace /^\s\+$/
-autocmd filetype * match BadWhitespace /^\t\+/
-autocmd filetype * match BadWhitespace / ;/
-
-" Default line limit to 80
-autocmd filetype * set textwidth=79    " Ancho a 80 caracteres
-autocmd filetype * set colorcolumn=79
+highlight BadWhitespace ctermbg=red guibg=red  "Whitespace
+set list  " show invisible spaces, tabulators and the end of lines as #
+set listchars=tab:>·,trail:·,extends:#,nbsp:·
+match BadWhitespace /^\s\+$/
+match BadWhitespace /^\t\+/
+match BadWhitespace / ;/
 
 """ Specific per-filetype basic setups
 
@@ -218,18 +200,9 @@ let g:syntastic_python_checkers= ['pyflakes']
 let g:sparkup = '~/.vim/ftplugin/html/sparkup.py'
 
 "" airline
-set laststatus=2
 let g:airline_theme='base16'
 let g:airline_powerline_fonts=1
 let g:Powerline_symbols='unicode'
-
-"" Staritfy
-" Set viminfo for statify
-if has('nvim')
-    set viminfo='100,n$HOME/.config/.nvim/files/info/nviminfo
-else
-    set viminfo='100,n$HOME/.vim/files/info/viminfo
-endif
 
 "" NERDTree
 let NERDTreeWinSize = 20
@@ -246,28 +219,26 @@ set rtp+=~/.fzf
 map <leader>t :FZF<CR>
 
 "" fugitive
+" Configure avature local github
 let g:fugitive_gitlab_domains = ['http://gitlab', 'http://gitlab.xcade.net']
 
-"""" Remaps
-
-" Remap Ack search to \a
-nmap <leader>a <Esc>:Ack!
-
-" Remap Gundo toggle to \u
+"" Gundo
 map <leader>u :GundoToggle<CR>
+
+"" Tagbar
+let g:tagbar_autofocus = 1
+nmap <leader>h :TagbarToggle<CR>
+
+"""" Remaps
 
 " Allows w!! for sudo write
 cmap w!! w !sudo tee % >/dev/null
 
-" Toggle tagbar
-nmap <leader>h :TagbarToggle<CR>
-let g:tagbar_autofocus = 1
-
 " Cleanup trailing spaces
 map <leader>cs :%s/\s\+$//g<CR>
 
-" Spaces for tabs
-map <leader>ct :%s/\t/    /g<CR>
+" Fix Spaces for tabs
+map <leader>ft :%s/\t/    /g<CR>
 
 " Read file under cursor
 map <cf> :read <cfile>
