@@ -63,6 +63,17 @@ set title                      " Set terminal title to filename
 set visualbell                 " please DONT BEEP
 set noerrorbells               " please DONT BEEP
 
+"" Temporary files
+set backup
+set backupdir=$HOME/.config/nvim/files/backup/
+set backupext =-vimbackup
+set backupskip =
+set directory =$HOME/.config/nvim/files/swap/
+set updatecount=100
+set undofile
+set undodir=$HOME/.config/nvim/files/undo/
+set viminfo='100,n$HOME/.config/.nvim/files/info/nviminfo
+
 "" Encoding
 set encoding=utf-8
 setglobal fileencoding=utf-8
