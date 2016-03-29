@@ -271,3 +271,9 @@ map <leader>ct :%s/\t/    /g<CR>
 
 " Read file under cursor
 map <cf> :read <cfile>
+
+" Change path to current file dir
+map <leader>cdf :cd %:p:h<CR>
+
+" Change window path to current file dir
+map <leader>cdl :lcd %:p:h<CR>
