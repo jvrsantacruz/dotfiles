@@ -251,8 +251,8 @@ map <leader>cs :%s/\s\+$//g<CR>
 " Fix Spaces for tabs
 map <leader>ft :%s/\t/    /g<CR>
 
-" Read file under cursor
-map <cf> :read <cfile>
+" Edit file under cursor
+map <leader>of :edit <cfile><CR>
 
 " Change path to current file dir
 map <leader>cdf :cd %:p:h<CR>
