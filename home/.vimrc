@@ -110,8 +110,8 @@ set undolevels=1000
 
 """ Colors
 set t_Co=256
-set background=dark
-color mustang
+set background=light
+color solarized
 
 " Change pop-up menu color (pink is horrible)
 highlight Pmenu ctermfg=0 ctermbg=2
