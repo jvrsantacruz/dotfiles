@@ -259,6 +259,6 @@ map <leader>if :read <cfile><CR>
 
 " Change path to current file dir
 map <leader>cd :cd %:p:h<CR>
-ac
+
 " Change window path to current file dir
 map <leader>cdl :lcd %:p:h<CR>
