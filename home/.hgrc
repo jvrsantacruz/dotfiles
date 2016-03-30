@@ -1,0 +1,20 @@
+[ui]
+verbose = True
+username = jsl
+
+[extensions]
+fetch =
+pager = 
+color = 
+rebase = 
+shelve = 
+record = 
+progress = 
+graphlog = 
+histedit =
+
+[diff]
+git = True
+
+[pager]
+pager = LESS='FRX' less
