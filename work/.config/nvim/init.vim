@@ -50,7 +50,7 @@ syntax on                      " Enable syntax highlighting
 
 "" Visual stuff
 set guioptions=                " Remove all menu in gvim
-set laststatus                 " Always show statusline
+set laststatus=2               " Always show statusline
 set display=lastline           " Show last line as much as possible
 set ttyfast                    " Allow for faster redrawing
 set lazyredraw                 " Avoid sticky cursor and slow scrolling
