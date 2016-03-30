@@ -1,0 +1,68 @@
+snippet -*-
+	# -*- coding: utf-8 -*-
+
+snippet coding
+	# -*- coding: utf-8 -*-
+
+snippet emptytest
+	assert False, "Not implemented test"
+
+snippet cabecera
+	#!/usr/bin/env python
+	# -*- coding: utf-8 -*-
+	"""
+
+	${1:`g:snips_author`} `system("date +'%d-%m-%Y'")`
+	"""
+
+snippet script
+	#!/usr/bin/env python
+	# -*- coding: utf-8 -*-
+	"""
+
+	${1:`g:snips_author`} `system("date +'%d-%m-%Y'")`
+	"""
+
+	import sys
+	import logging
+	from argparse import ArgumentParser
+
+	_LOGGING_FMT_ = '%(asctime)s %(levelname)-8s %(message)s'
+
+
+	def error(msg, is_exit=True):
+		logging.error(msg)
+		if is_exit:
+			sys.exit()
+
+
+	def parse_args():
+		"""Parses the command line and checks some values.
+		Returns parsed options and positional arguments: (opts, args)"
+		"""
+		parser = ArgumentParser(usage="%(prog)s [options] ARG ARG")
+
+		parser.add_argument("-d", "--dbfile", dest="dbfile", action="store",
+							default="dbsqlite3.db", help="")
+
+		parser.add_argument("-v", "--verbose", dest="verbose", action="count",
+							default=0, help="")
+
+		parser.add_argument("-u", "--human", dest="human", action="store_true",
+						default=False, help="Human readable sizes")
+
+		args = parser.parse_args()
+
+		# Configure logging
+		logging_levels = {0: logging.WARNING, 1: logging.INFO, 2: logging.DEBUG}
+		level = logging_levels[args.verbose if args.verbose < 3 else 2]
+		logging.basicConfig(level=level, format=_LOGGING_FMT_)
+
+		return args
+
+
+	def main():
+		args = parse_args()
+
+	if __name__ == "__main__":
+		main()
