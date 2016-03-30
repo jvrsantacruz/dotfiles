@@ -69,22 +69,8 @@ set nowritebackup
 """ Colors
 syntax enable
 set t_Co=256
-              
-if ( match(hostname(), 'tlap') >= 0 )
-	set background=light
-	let g:solarized_termcolors=256
-	set guifont=Meslo\ LG\ L\ 10
-"	set guifont=Meslo\ LG\ L\ 12
-	color solarized
-elseif ( match(hostname(), 'lap') >= 0 )
-	color mustang
-	set background=dark
-endif
-
-" Cambiar los colores spara BadSpell y que no se mate con los strings
-" Fondo a rojo, letras a blanco
-highlight SpellBad term=standout ctermbg=1 ctermfg=7 guifg=White guibg=LightRed
-au BufRead,BufNewFile *.py,*.pyx,*.css,*.html highlight BadWhitespace ctermbg=red guibg=red
+set background=dark
+color mustang
 
 " Change pop-up menu color (pink is horrible)
 highlight Pmenu ctermfg=0 ctermbg=2
