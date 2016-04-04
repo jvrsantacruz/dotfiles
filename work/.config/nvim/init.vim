@@ -72,7 +72,11 @@ set directory =$HOME/.config/nvim/files/swap/
 set updatecount=100
 set undofile
 set undodir=$HOME/.config/nvim/files/undo/
-set viminfo='100,n$HOME/.config/.nvim/files/info/nviminfo
+if has('nvim')
+    set viminfo='100,n$HOME/.config/.nvim/files/info/nviminfo
+else
+    set viminfo='100,n$HOME/.config/.nvim/files/info/viminfo
+end
 
 "" Encoding
 set encoding=utf-8
