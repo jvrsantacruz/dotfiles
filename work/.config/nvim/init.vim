@@ -266,3 +266,6 @@ map <leader>cd :cd %:p:h<CR>
 
 " Change window path to current file dir
 map <leader>cdl :lcd %:p:h<CR>
+
+" Search word under cursor without jumping
+map <leader>sw *``
