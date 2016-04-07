@@ -269,3 +269,6 @@ map <leader>cdl :lcd %:p:h<CR>
 
 " Search word under cursor without jumping
 map <leader>sw *``
+
+" Search visual selection
+map <leader>sv y/<C-R>"<CR>
