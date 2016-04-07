@@ -100,6 +100,9 @@ alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo
 
 function mkcd { mkdir $1 && cd $1; }
 
+# shorthand for vagrant
+function v { vagrant $@; }
+
 # recreate vagrant environment
 function revagrant { vagrant destroy -f $1 && vagrant up $1; alert "finished creation of $1"; }
 
