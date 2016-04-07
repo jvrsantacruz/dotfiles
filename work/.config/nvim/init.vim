@@ -253,7 +253,7 @@ cmap w!! w !sudo tee % >/dev/null
 map <leader>cs :%s/\s\+$//g<CR>
 
 " Fix Spaces for tabs
-map <leader>ft :%s/\t/    /g<CR>
+map <leader>ct :%s/\t/    /g<CR>
 
 " Edit file under cursor
 map <leader>of :edit <cfile><CR>
