@@ -117,41 +117,6 @@ function getcpufreq { cat /proc/cpuinfo | grep "cpu MHz"; }
 
 function mkcd { mkdir $1 && cd $1; }
 function cdls { cd $1 && ls; }
-function ezip { 
-		DEST=$1
-		shift
-		if [ -f $DEST ]; then
-			openssl aes-256-cbc -d $1
-		else
-			zip -r $1 $@ && openssl aes256-cbc -in $1 -e -out $1.aes
-		fi
-	}
-
-# Montar con sshfs
-#DIANA=$HOME/diana
-#alias mdiana="mkdir -p $DIANA && sshfs arl@diana.uca.es:/ $DIANA && 
-#cd $DIANA/iiidb/http/staging/screens"
-#alias udiana="fusermount -u $DIANA && rmdir $DIANA"
-
-# Montar con sshfs
-#DSPACE=$HOME/dspace
-#alias mdspace="mkdir -p $DSPACE && sshfs dspace@rod.uca.es:/ $DSPACE &&
-#cd $DSPACE/home/dspace"
-#alias udspace="fusermount -u $DSPACE && rmdir $DSPACE"
-
-export WORK_HOME=/home/arl/dev
-
-function work { 
-	cd $WORK_HOME/$1
-	workon $1
-}
-
-export TWORK_HOME=/home/arl/taric
-
-function twork { 
-	cd $TWORK_HOME/$1
-	workon $1
-}
 
 # Poner la consola en modo vi
 set -o vi
