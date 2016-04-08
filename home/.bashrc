@@ -147,3 +147,6 @@ export EDITOR=vim
 
 # Set console in vi mode
 set -o vi
+
+## tmux
+alias tmux='TERM=screen-256color-bce tmux'
