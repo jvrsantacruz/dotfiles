@@ -28,36 +28,41 @@ if [ -z "$debian_chroot" ] && [ -r /etc/debian_chroot ]; then
     debian_chroot=$(cat /etc/debian_chroot)
 fi
 
-#if [ -f ~/.git-prompt.sh ]; then
-#	source ~/.git-prompt.sh
-#fi
+# set a fancy prompt (non-color, unless we know we "want" color)
+case "$TERM" in
+    xterm-color) color_prompt=yes;;
+esac
 
-function git_branch { 
-	echo `__git_ps1 '(%s)'` 
-}
+# uncomment for a colored prompt, if the terminal has the capability; turned
+# off by default to not distract the user: the focus in a terminal window
+# should be on the output of commands, not on the prompt
+force_color_prompt=yes
 
-function battery { 
-	acpi_output=`acpi -p 2> /dev/null`
-	sign=
-	if [ "`echo $acpi_output | fgrep discharging`" ] ; then
-		sign='-'
-	elif [ "`echo $acpi_output | fgrep charging`" ] ; then
-		sign='+'
-	fi
+if [ -n "$force_color_prompt" ]; then
+    if [ -x /usr/bin/tput ] && tput setaf 1 >&/dev/null; then
+	# We have color support; assume it's compliant with Ecma-48
+	# (ISO/IEC-6429). (Lack of such support is extremely rare, and such
+	# a case would tend to support setf rather than setaf.)
+	color_prompt=yes
+    else
+	color_prompt=
+    fi
+fi
 
-	battery_level=`echo $acpi_output | sed -e 's/.*, \([0-9]\+%\).*/\1/'` 
-
-	if [ "$battery_level" ]; then
-		echo "(${sign}${battery_level})"
-	fi
-}
+if [ "$color_prompt" = yes ]; then
+    PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
+else
+    PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
+fi
+unset color_prompt force_color_prompt
 
 # If this is an xterm set the title to user@host:dir
 case "$TERM" in
 xterm*|rxvt*)
-	PS1="\[\e]0;${debian_chroot:+($debian_chroot)}\u@\h:\w\a\]\$(vcprompt)\$(battery)$PS1"
+    PS1="\[\e]0;${debian_chroot:+($debian_chroot)}\u@\h: \w\a\]$PS1"
     ;;
 *)
+    ;;
 esac
 
 # enable color support of ls and also add handy aliases
@@ -80,6 +85,22 @@ alias l='ls -CF'
 # Add an "alert" alias for long running commands.  Use like so:
 #   sleep 10; alert
 alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
+
+function battery {
+	acpi_output=`acpi -p 2> /dev/null`
+	sign=
+	if [ "`echo $acpi_output | fgrep discharging`" ] ; then
+		sign='-'
+	elif [ "`echo $acpi_output | fgrep charging`" ] ; then
+		sign='+'
+	fi
+
+	battery_level=`echo $acpi_output | sed -e 's/.*, \([0-9]\+%\).*/\1/'`
+
+	if [ "$battery_level" ]; then
+		echo "(${sign}${battery_level})"
+	fi
+}
 
 # Alias definitions.
 # You may want to put all your additions into a separate file like
@@ -118,11 +139,11 @@ function getcpufreq { cat /proc/cpuinfo | grep "cpu MHz"; }
 function mkcd { mkdir $1 && cd $1; }
 function cdls { cd $1 && ls; }
 
-# Poner la consola en modo vi
-set -o vi
-
 # virtualenvwrapper
 export WORKON_HOME="$HOME/.virtualenvs"
 source `which virtualenvwrapper.sh`
 export PATH=$HOME/.local/bin:$PATH
 export EDITOR=vim
+
+# Set console in vi mode
+set -o vi

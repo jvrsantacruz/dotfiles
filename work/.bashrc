@@ -20,10 +20,6 @@ HISTFILESIZE=2000
 # update the values of LINES and COLUMNS.
 shopt -s checkwinsize
 
-# If set, the pattern "**" used in a pathname expansion context will
-# match all files and zero or more directories and subdirectories.
-#shopt -s globstar
-
 # make less more friendly for non-text input files, see lesspipe(1)
 [ -x /usr/bin/lesspipe ] && eval "$(SHELL=/bin/sh lesspipe)"
 
@@ -86,8 +82,6 @@ alias ll='ls -alF'
 alias la='ls -A'
 alias l='ls -CF'
 
-set -o vi
-
 alias ..='cd ..'
 alias ...='cd ../..'
 alias ....='cd ../../..'
@@ -138,3 +132,6 @@ export PATH="$PATH:$HOME/.rvm/bin" # Add RVM to PATH for scripting
 
 ## tmux
 alias tmux='TERM=screen-256color-bce tmux'
+
+# Set console in vi mode
+set -o vi
