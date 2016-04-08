@@ -72,7 +72,11 @@ set directory =$HOME/.config/nvim/files/swap/
 set updatecount=100
 set undofile
 set undodir=$HOME/.config/nvim/files/undo/
-set viminfo='100,n$HOME/.config/.nvim/files/info/nviminfo
+if has('nvim')
+    set viminfo='100,n$HOME/.config/.nvim/files/info/nviminfo
+else
+    set viminfo='100,n$HOME/.config/.nvim/files/info/viminfo
+end
 
 "" Encoding
 set encoding=utf-8
@@ -249,7 +253,7 @@ cmap w!! w !sudo tee % >/dev/null
 map <leader>cs :%s/\s\+$//g<CR>
 
 " Fix Spaces for tabs
-map <leader>ft :%s/\t/    /g<CR>
+map <leader>ct :%s/\t/    /g<CR>
 
 " Edit file under cursor
 map <leader>of :edit <cfile><CR>
@@ -262,3 +266,9 @@ map <leader>cd :cd %:p:h<CR>
 
 " Change window path to current file dir
 map <leader>cdl :lcd %:p:h<CR>
+
+" Search word under cursor without jumping
+map <leader>sw *``
+
+" Search visual selection
+map <leader>sv y/<C-R>"<CR>
