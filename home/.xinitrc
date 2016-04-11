@@ -1,3 +1,3 @@
 exec gnome-session
-#exec mate-session
+dbus-update-activation-environment --all
 #exec dropboxd
