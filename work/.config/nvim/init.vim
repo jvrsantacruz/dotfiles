@@ -126,7 +126,7 @@ highlight PmenuThumb ctermfg=0 ctermbg=7
 
 
 " Change BadSpell highlight red background, white letters
-highlight SpellBad term=standout ctermbg=1 ctermfg=7 guifg=White guibg=LightRed
+highlight SpellBad term=standout cterm=underline ctermfg=Red
 
 " Avoid bad whitespace
 highlight BadWhitespace ctermbg=red guibg=red  "Whitespace
