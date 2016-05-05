@@ -1,9 +1,10 @@
 [http]
 # Enable SSL Cert verification (default: true)
 verify = true
+cache = 360
 
 # Global lists configuration
-[listings]
+[command.list]
 # Output format
 #format = "grid"
 # Output columns
