@@ -100,6 +100,9 @@ function v { vagrant $@; }
 # recreate vagrant environment
 function revagrant { vagrant destroy -f $1 && vagrant up $1; alert "finished creation of $1"; }
 
+# create virtualenv from project directory
+function mkvenv { mkvirtualenv $(basename $PWD) -a $PWD $@ ;}
+
 # Alias definitions.
 # You may want to put all your additions into a separate file like
 # ~/.bash_aliases, instead of adding them here directly.
