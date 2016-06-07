@@ -103,6 +103,9 @@ function revagrant { vagrant destroy -f $1 && vagrant up $1; alert "finished cre
 # create virtualenv from project directory
 function mkvenv { mkvirtualenv $(basename $PWD) -a $PWD $@ ;}
 
+# clone avature gitlab project
+function gclone { git clone git@gitlab.xcade.net:avature/$1; }
+
 # Alias definitions.
 # You may want to put all your additions into a separate file like
 # ~/.bash_aliases, instead of adding them here directly.
