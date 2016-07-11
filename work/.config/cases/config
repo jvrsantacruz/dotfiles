@@ -36,3 +36,9 @@ columns = ["step", "Priority"]
 # Available lists by name
 [list.default]
 url = "https://teg.avature.net/PublicLists/9944FB114D2B5C42CF28D3EA429CE959"
+
+[list.full]
+url = "https://teg.avature.net/PublicLists/5F8EA698554D736728028EEBB7C3F201"
+
+[list.all]
+url = "https://teg.avature.net/PublicLists/8F5C42891791D8F052665C34107BAB39"
