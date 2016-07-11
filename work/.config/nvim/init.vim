@@ -274,3 +274,7 @@ map <leader>sw *``
 
 " Search visual selection
 map <leader>sv y/<C-R>"<CR>
+
+" Grep selected text
+nmap gs <plug>(GrepperOperator)
+xmap gs <plug>(GrepperOperator)
