@@ -3,6 +3,12 @@
 verify = true
 cache = 360
 
+[general]
+# Column alias
+column_alias = [
+    ["Case Workflow step", "step"],
+]
+
 # Global lists configuration
 [command.list]
 # Output format
@@ -23,10 +29,9 @@ columns = ["Case ID", "Name", "Case Workflow step", "Priority"]
 #sort_by = ["Cycle", "Priority"]
 # Reverse output order
 #reverse = true
-# Column alias
-column_alias = [
-    ["Case Workflow step", "step"],
-]
+
+[commands.stats]
+columns = ["step", "Priority"]
 
 # Available lists by name
 [list.default]
