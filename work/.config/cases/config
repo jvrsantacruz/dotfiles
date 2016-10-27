@@ -6,8 +6,9 @@ cache = 360
 [general]
 # Column alias
 column_alias = [
-    ["Case Workflow step", "step"],
+    ["Case ID", "id"],
     ["Creation date", "date"],
+    ["Case Workflow step", "step"],
 ]
 
 # Global lists configuration
