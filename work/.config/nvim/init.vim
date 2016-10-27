@@ -3,6 +3,7 @@ call plug#begin('~/.vim/plugged')
 Plug 'altercation/vim-colors-solarized'
 Plug 'amperser/proselint'
 Plug 'bufexplorer.zip'
+Plug 'cespare/vim-toml'
 Plug 'davidhalter/jedi-vim'
 Plug 'editorconfig/editorconfig-vim'
 Plug 'flazz/vim-colorschemes'
@@ -33,8 +34,8 @@ Plug 'tpope/vim-repeat'
 Plug 'tpope/vim-surround'
 Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
-Plug 'vim-utils/vim-man'
 Plug 'vim-scripts/AdvancedSorters'
+Plug 'vim-utils/vim-man'
 
 call plug#end()
 
