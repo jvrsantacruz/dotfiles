@@ -113,6 +113,13 @@ function branch { git name-rev --name-only HEAD; }
 # current date to mark files
 function datename { date "+%Y-%m-%d_%H-%M-%S"; }
 
+# go to sandbox home directory
+function cdsbxr {
+    local name=$1
+    local path=$(sbxr list --columns "Vagrant directory" --no-header --format plain --name $name)
+    echo $path
+    cd $path
+}
 
 # Alias definitions.
 # You may want to put all your additions into a separate file like
