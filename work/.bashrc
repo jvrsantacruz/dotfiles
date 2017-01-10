@@ -137,6 +137,12 @@ if [ -f /etc/bash_completion ] && ! shopt -oq posix; then
     . /etc/bash_completion
 fi
 
+# Virtualenvwrapper (Ubuntu)
+# This should be enabled when bash_completion is, but it doesn't
+#if ! type workon &> /dev/null; then
+#    source /etc/bash_completion.d/virtualenvwrapper
+#fi
+
 # Powerline
 export POWERLINE_CONFIG_COMMAND=powerline-config
 if [ -f ~/.local/lib/python2.7/site-packages/powerline/bindings/bash/powerline.sh  ]; then
