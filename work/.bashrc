@@ -102,7 +102,7 @@ function v { vagrant $@; }
 function revagrant { vagrant destroy -f $1 && vagrant up $1; alert "finished creation of $1"; }
 
 # create virtualenv from project directory
-function mkvenv { mkvirtualenv $(basename $PWD) -a $PWD $@ ;}
+function mkvenv { mkvirtualenv -a $PWD $@ $(basename $PWD);}
 
 # clone avature gitlab project
 function gclone { git clone git@gitlab.xcade.net:avature/$1; }
@@ -148,6 +148,12 @@ export POWERLINE_CONFIG_COMMAND=powerline-config
 if [ -f ~/.local/lib/python2.7/site-packages/powerline/bindings/bash/powerline.sh  ]; then
 	source ~/.local/lib/python2.7/site-packages/powerline/bindings/bash/powerline.sh
 fi
+
+# Dircolors for solarized theme
+eval `dircolors ~/.local/share/.dir_colors`
+
+# Force keyboard bindings evaluation
+xmodmap ~/.Xmodmap
 
 ## fuzzyfinder
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
