@@ -102,7 +102,11 @@ function v { vagrant $@; }
 function revagrant { vagrant destroy -f $1 && vagrant up $1; alert "finished creation of $1"; }
 
 # create virtualenv from project directory
-function mkvenv { mkvirtualenv -a $PWD $@ $(basename $PWD);}
+function mkvenv { 
+    local name=$(basename $PWD)
+    echo Creating virtualenv $name
+    mkvirtualenv -a $PWD $@ $name;
+}
 
 # clone avature gitlab project
 function gclone { git clone git@gitlab.xcade.net:avature/$1; }
