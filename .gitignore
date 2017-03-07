@@ -3,3 +3,4 @@ work/.config/nvim/plugged
 work/.config/cases/config
 home/.config/nvim/plugged
 home/.config/nvim/files
+*/.config/nvim/files
