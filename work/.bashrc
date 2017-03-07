@@ -67,7 +67,7 @@ esac
 
 # enable color support of ls and also add handy aliases
 if [ -x /usr/bin/dircolors ]; then
-    test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
+    test -r ~/.dircolors && eval "$(dircolors -b ~/.local/share/.dir_colors)" || eval "$(dircolors -b)"
     alias ls='ls --color=auto'
     #alias dir='dir --color=auto'
     #alias vdir='vdir --color=auto'
@@ -148,9 +148,6 @@ export POWERLINE_CONFIG_COMMAND=powerline-config
 if [ -f ~/.local/lib/python2.7/site-packages/powerline/bindings/bash/powerline.sh  ]; then
 	source ~/.local/lib/python2.7/site-packages/powerline/bindings/bash/powerline.sh
 fi
-
-# Dircolors for solarized theme
-eval `dircolors ~/.local/share/.dir_colors`
 
 # Force keyboard bindings evaluation
 xmodmap ~/.Xmodmap
