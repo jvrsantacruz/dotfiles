@@ -87,7 +87,6 @@ alias ..='cd ..'
 alias ...='cd ../..'
 alias ....='cd ../../..'
 alias cpclip='xclip -o | xclip -sel clip'
-alias go='gnome-open'
 
 # Add an "alert" alias for long running commands.  Use like so:
 #   sleep 10; alert
@@ -123,6 +122,44 @@ function cdsbxr {
     local path=$(sbxr list --columns "Vagrant directory" --no-header --format plain --name $name)
     echo $path
     cd $path
+}
+
+# lxd copy directories recursively
+function lxc_cp {
+    local name="$1"
+    local src="$2"
+    local dst="$3"
+
+    tar cz "$src" | lxc exec "$name" tar xzf - "$dest"
+}
+
+function cr {
+    local branch="$1"
+    iatsCR -d gitlab $branch
+}
+
+function _command_exists {
+    command -v "$1" &> /dev/null
+}
+
+function go {
+    local openers="xdg-open" "gnome-open"
+    for opener in $openers; do
+        if _command_exists "$opener"; then
+            $opener $@
+            return
+        fi
+    done
+
+    echo "No available opener program: $openers"
+    exit 1
+}
+
+function gitlab {
+    local name=${1:-$(basename $(readlink -f .))}
+    local user=${2:-avature}
+
+    go https://gitlab.xcade.net/$user/$name
 }
 
 # Alias definitions.
