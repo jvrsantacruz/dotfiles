@@ -198,6 +198,7 @@ xmodmap ~/.Xmodmap
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
 # disable tmux integration
 export FZF_TMUX=0
+export FZF_DEFAULT_COMMAND='ag --hidden -g "" --ignore "**.pyc" --ignore "**.deb" --ignore ".cache" --ignore ".git" --ignore "**.egg-info" --ignore ".ropeproject"'
 
 ## rvm
 export PATH="$PATH:$HOME/.rvm/bin" # Add RVM to PATH for scripting
