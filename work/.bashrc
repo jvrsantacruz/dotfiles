@@ -69,6 +69,7 @@ esac
 if [ -x /usr/bin/dircolors ]; then
     test -r ~/.dircolors && eval "$(dircolors -b ~/.local/share/.dir_colors)" || eval "$(dircolors -b)"
     alias ls='ls --color=auto'
+    eval $(dircolors ~/.config/dircolors/current)
     #alias dir='dir --color=auto'
     #alias vdir='vdir --color=auto'
 
