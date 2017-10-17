@@ -109,7 +109,7 @@ function mkvenv {
 }
 
 # clone avature gitlab project
-function gclone { git clone git@gitlab.xcade.net:avature/$1; }
+function gclone { git clone git@gitlab.xcade.net:avature/$1 $2; }
 
 # current git branch
 function branch { git name-rev --name-only HEAD; }
