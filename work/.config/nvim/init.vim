@@ -12,7 +12,7 @@ Plug 'jmcantrell/vim-virtualenv'
 Plug 'jreybert/vimagit'
 Plug 'junegunn/fzf'
 Plug 'junegunn/fzf.vim'
-Plug 'klen/python-mode'
+Plug 'klen/python-mode', {'branch': 'develop'}
 Plug 'lepture/vim-jinja'
 Plug 'majutsushi/tagbar'
 Plug 'MarcWeber/vim-addon-mw-utils'
@@ -26,6 +26,7 @@ Plug 'scrooloose/syntastic'
 Plug 'shumphrey/fugitive-gitlab.vim'
 Plug 'sirver/ultisnips'
 Plug 'sjl/gundo.vim'
+Plug 'szw/vim-g'
 Plug 'terryma/vim-multiple-cursors'
 Plug 'tpope/vim-characterize'
 Plug 'tpope/vim-eunuch'
@@ -188,12 +189,14 @@ let g:pymode_doc = 0
 " No code folding
 let g:pymode_folding = 0
 
-" Rope
+"" Rope
 let g:pymode_rope = 0
 let g:pymode_rope_show_doc_bind = ''
 let g:pymode_rope_vim_completion = 0
 let g:pymode_rope_complete_on_dot = 0
 let g:pymode_rope_lookup_project = 0
+let g:pymode_rope_local_prefix = '<leader>c'
+
 let g:pymode_lint_write = 1
 let g:pymode_lint_ignore = "E501,E128,E127,W0401,C0111"
 
