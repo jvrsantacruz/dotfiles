@@ -108,6 +108,13 @@ function mkvenv {
     mkvirtualenv -a $PWD $@ $name;
 }
 
+function mkwork {
+    local name=${1:-$(date +'%Y-%m-%d_%H-%M-%S')}
+    workon workspace
+    mkdir -p $name
+    cd $name
+}
+
 # clone avature gitlab project
 function gclone { git clone git@gitlab.xcade.net:avature/$1 $2; }
 
