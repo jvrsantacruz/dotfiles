@@ -2,3 +2,4 @@
 *\.pyc
 *\.pybuild
 *\.deb
+*\.egg
