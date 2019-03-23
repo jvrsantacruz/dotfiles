@@ -1,8 +1,10 @@
 call plug#begin('~/.vim/plugged')
 
+Plug 'MarcWeber/vim-addon-mw-utils'
 Plug 'altercation/vim-colors-solarized'
 Plug 'amperser/proselint'
 Plug 'bufexplorer.zip'
+Plug 'cschlueter/vim-mustang'
 Plug 'davidhalter/jedi-vim'
 Plug 'editorconfig/editorconfig-vim'
 Plug 'flazz/vim-colorschemes'
@@ -13,7 +15,6 @@ Plug 'junegunn/fzf'
 Plug 'junegunn/fzf.vim'
 Plug 'klen/python-mode'
 Plug 'majutsushi/tagbar'
-Plug 'MarcWeber/vim-addon-mw-utils'
 Plug 'mhinz/vim-grepper'
 Plug 'mhinz/vim-signify'
 Plug 'mhinz/vim-startify'
