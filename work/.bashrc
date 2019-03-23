@@ -93,8 +93,6 @@ alias cpclip='xclip -o | xclip -sel clip'
 #   sleep 10; alert
 alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
 
-function mkcd { mkdir $1 && cd $1; }
-
 # shorthand for vagrant
 function v { vagrant $@; }
 
@@ -102,7 +100,7 @@ function v { vagrant $@; }
 function revagrant { vagrant destroy -f $1 && vagrant up $1; alert "finished creation of $1"; }
 
 # create virtualenv from project directory
-function mkvenv { 
+function mkvenv {
     local name=$(basename $PWD)
     echo Creating virtualenv $name
     mkvirtualenv -a $PWD $@ $name;
@@ -146,6 +144,7 @@ function cr {
     iatsCR -d gitlab $branch
 }
 
+
 function _command_exists {
     command -v "$1" &> /dev/null
 }
@@ -170,6 +169,76 @@ function gitlab {
     go https://gitlab.xcade.net/$user/$name
 }
 
+function listdir {
+    local path=${1:-.}
+
+    find $path -mindepth 1 -maxdepth 1 -type d
+}
+
+function fetchall {
+    local projects_root
+    projects_root=$(readlink -f ${1:-.})
+
+    parallel --no-notice \
+        git --git-dir "{}/.git" fetch \
+        ::: $(listdir $projects_root)
+
+    #for dirname in $(listdir $projects_root); do
+    #    echo "Fetching $dirname"
+    #    git --git-dir "$dirname/.git" fetch
+    #done
+}
+
+function lxc_stopall {
+    lxc list  | grep RUNNING | cut -f 2 -d '|' | xargs lxc stop
+    # lxc list --format json \
+    #   | jq '.[] | select( .status | contains("Running")) | .name ' \
+    #   | xargs lxc stop
+}
+
+function push_force {
+    local dest_branch=$(branch)
+    if test -z "$dest_branch"; then
+        "No current branch"
+        return 1
+    fi
+    set -x
+    git push origin $(branch) --force-with-lease
+    set +x
+}
+
+function autorebase {
+    git rebase --interactive --autosquash --autostash --keep-empty $@
+}
+
+
+declare _highlight_command="highlight --out-format xterm256 --style zellner --failsafe --quiet"
+
+
+function ccat {
+    $_highlight_command $@
+}
+
+function cless {
+    ccat $@ | less -R
+}
+
+function files {
+    fzf --preview "$_highlight_command {}"
+}
+
+function png {
+    piab-ng $@
+}
+
+function clip {
+    xsel --input --clipboard --keep
+}
+
+function unclip {
+    xsel --output --clipboard
+}
+
 # Alias definitions.
 # You may want to put all your additions into a separate file like
 # ~/.bash_aliases, instead of adding them here directly.
@@ -192,6 +261,21 @@ fi
 #    source /etc/bash_completion.d/virtualenvwrapper
 #fi
 
+# Completions
+function _git_list_branches {
+    # Removing the leading space and f*** asterisk
+    git branch --list --all --no-merged | cut -c 3-
+}
+
+function _fzf_complete_git_branches {
+    _fzf_complete "--reverse --multi" "$@" < <(_git_list_branches)
+}
+
+complete -F _fzf_complete_git_branches -o default -o bashdefault cr
+complete -F _fzf_complete_git_branches -o default -o bashdefault iatsMerge
+complete -F _fzf_complete_git_branches -o default -o bashdefault iatsSwitch
+
+
 # Powerline
 export POWERLINE_CONFIG_COMMAND=powerline-config
 if [ -f ~/.local/lib/python2.7/site-packages/powerline/bindings/bash/powerline.sh  ]; then
@@ -199,13 +283,13 @@ if [ -f ~/.local/lib/python2.7/site-packages/powerline/bindings/bash/powerline.s
 fi
 
 # Force keyboard bindings evaluation
-xmodmap ~/.Xmodmap
+#xmodmap ~/.Xmodmap
 
 ## fuzzyfinder
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
 # disable tmux integration
 export FZF_TMUX=0
-export FZF_DEFAULT_COMMAND='ag --hidden -g "" --ignore "**.pyc" --ignore "**.deb" --ignore ".cache" --ignore ".git" --ignore "**.egg-info" --ignore ".ropeproject"'
+export FZF_DEFAULT_COMMAND='ag --hidden -g "" --ignore "**.pyc" --ignore "**.deb" --ignore ".cache" --ignore ".tox" --ignore ".git" --ignore "**.egg-info" --ignore ".ropeproject"'
 
 ## rvm
 export PATH="$PATH:$HOME/.rvm/bin" # Add RVM to PATH for scripting

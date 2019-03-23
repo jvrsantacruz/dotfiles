@@ -1,6 +1,8 @@
 [user]
-    email = javier.santacruz@avature.net
     name = Javier Santacruz
+    email = javier.santacruz@avature.net
+    signkey = 4AFF623E
+    signingkey = 4AFF623E
 
 [alias]
   ls = log --pretty=format:"%C(yellow)%h%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate
@@ -9,6 +11,8 @@
   ld = log --pretty=format:"%C(yellow)%h\\ %ad%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --date=relative
 
 [push]
-default = simple
+    default = simple
 [rerere]
-	enabled = true
+    enabled = true
+[diff]
+    tool = meld

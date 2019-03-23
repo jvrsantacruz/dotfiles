@@ -27,7 +27,15 @@ if [ -d "$HOME/.local/bin" ] ; then
 fi
 
 export EDITOR=nvim
+#export NAME="Javier Santacruz"
+#export EMAIL=javier.santacruz@avature.net
 
 export PATH="$PATH:$HOME/.rvm/bin" # Add RVM to PATH for scripting
 
 [[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm" # Load RVM into a shell session *as a function*
+
+export GITLAB_API_ENDPOINT="https://gitlab.xcade.net/api/v3"
+export GITLAB_API_PRIVATE_TOKEN="GITLAB_API_PRIVATE_TOKEN_REMOVED"
+export CHEATCOLORS=true
+export DEBEMAIL='javier.santacruz@avature.net'
+export DEBFULLNAME='Javier Santacruz'
