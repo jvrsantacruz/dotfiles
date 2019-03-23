@@ -2,8 +2,11 @@ call plug#begin('~/.vim/plugged')
 
 Plug 'altercation/vim-colors-solarized'
 Plug 'AndrewRadev/sideways.vim'
+Plug 'arcticicestudio/nord-vim'
+Plug 'avakhov/vim-yaml'
 Plug 'cespare/vim-toml'
-Plug 'davidhalter/jedi-vim', {'tag': '0.9.0'}
+Plug 'chr4/nginx.vim'
+Plug 'davidhalter/jedi-vim'
 Plug 'dhruvasagar/vim-buffer-history'
 Plug 'elzr/vim-json'
 Plug 'ervandew/supertab'
@@ -11,6 +14,7 @@ Plug 'fisadev/vim-isort'
 Plug 'flazz/vim-colorschemes'
 Plug 'google/yapf', { 'rtp': 'plugins/vim', 'for': 'python' }
 Plug 'hdima/python-syntax'
+Plug 'honza/vim-snippets'
 Plug 'jiangmiao/auto-pairs'
 Plug 'jmcantrell/vim-virtualenv'
 Plug 'jreybert/vimagit'
@@ -24,11 +28,13 @@ Plug 'mhinz/vim-grepper'
 Plug 'mhinz/vim-signify'
 Plug 'mhinz/vim-startify'
 Plug 'morhetz/gruvbox'
+Plug 'python-rope/ropevim'
 Plug 'rodjek/vim-puppet'
 Plug 'roxma/nvim-completion-manager'
 Plug 'scrooloose/nerdtree'
 Plug 'Shougo/denite.nvim'
 Plug 'shumphrey/fugitive-gitlab.vim'
+Plug 'sirver/UltiSnips'
 Plug 'sjl/gundo.vim'
 Plug 'szw/vim-g'
 Plug 'terryma/vim-multiple-cursors'
@@ -153,6 +159,7 @@ autocmd BufRead,BufNewFile *.py,*.pyx set filetype=python
 autocmd filetype python set nofoldenable  " Desactivar folding
 "autocmd filetype python setlocal equalprg=yapf  " Autoformatting
 autocmd filetype python nmap <leader>l :ALELint<CR>:lopen<CR>
+autocmd filetype python let g:ale_fixers = {'python': ['yapf', 'isort']}
 
 
 " Markdown/txt
@@ -183,6 +190,9 @@ autocmd BufRead,BufNewFile *.service,*.unit set filetype=systemd
 autocmd BufRead,BufNewFile *.js set filetype=javascript " Autoindent with 2 spaces
 autocmd filetype javascript map <leader>l :SyntasticCheck<CR> :Errors<CR>
 
+" nginx
+autocmd BufRead,BufNewFile *.conf set filetype=nginx
+
 """"""""" Plugins """"""""""""
 
 "" Python-jedi
@@ -204,7 +214,7 @@ let g:ale_python_mypy_options = '--ignore-missing-imports'
 let g:ale_python_pylint_options = '--disable missing-docstring,
             \no-self-use,expression-not-assigned,invalid-name'
 let g:ale_python_isort_executable = 'isort'
-autocmd filetype python let g:ale_fixers = ['isort']
+"autocmd filetype python let g:ale_fixers = ['isort', 'yapf']
 map <leader>f :ALEFix<CR>
 
 "" NERDTree
@@ -232,6 +242,14 @@ map <leader>u :GundoToggle<CR>
 let g:tagbar_autofocus = 1
 nmap <leader>h :TagbarToggle<CR>
 
+"" UltiSnips
+let g:UltiSnipsExpandTrigger="<tab>"
+let g:UltiSnipsJumpForwardTrigger="<c-b>"
+let g:UltiSnipsJumpBackwardTrigger="<c-z>"
+
+" If you want :UltiSnipsEdit to split your window.
+let g:UltiSnipsEditSplit="vertical"
+
 """" Remaps
 
 " Allows w!! for sudo write
@@ -254,9 +272,6 @@ map <leader>cd :cd %:p:h<CR>
 
 " Change window path to current file dir
 map <leader>cdl :lcd %:p:h<CR>
-
-" Search word under cursor without jumping
-map <leader>sw *``
 
 " Search visual selection
 map <leader>sv y/<C-R>"<CR>

@@ -13,8 +13,8 @@ HISTCONTROL=ignoredups:ignorespace
 shopt -s histappend
 
 # for setting history length see HISTSIZE and HISTFILESIZE in bash(1)
-HISTSIZE=1000
-HISTFILESIZE=2000
+HISTSIZE=10000
+HISTFILESIZE=20000
 
 # check the window size after each command and, if necessary,
 # update the values of LINES and COLUMNS.
@@ -118,26 +118,49 @@ if [ -f /etc/bash_completion ] && ! shopt -oq posix; then
     . /etc/bash_completion
 fi
 
-#alias mvlast='~/./.mvlast.py'
-#alias cplist='~/./.cplist.py'
-#alias move='rsync -r -v --progress --remove-source-files'
-alias copy='rsync -aWr --progress'
-alias go='xdg-open'
-alias lsat='ls -1t | head'
-alias mgrep='fgrep -iHRn '
-alias hdate='date +"%d-%m-%Y-%H-%M-%S"'
+### Functions
+
+# current git branch
+function branch {
+    git name-rev --name-only HEAD
+}
+
+# Nicer interactive rebase
+function autorebase {
+    git rebase --interactive --autosquash --autostash --keep-empty $@
+}
+
+# Safe git push force
+function push_force {
+    local dest_branch=$(branch)
+    if test -z "$dest_branch"; then
+        "No current branch"
+        return 1
+    fi
+    set -x
+    git push origin $(branch) --force-with-lease
+    set +x
+}
+
+# Open arbitrary uri
+function go {
+    local openers="xdg-open" "gnome-open"
+    for opener in $openers; do
+        if _command_exists "$opener"; then
+            $opener $@
+            return
+        fi
+    done
+
+    echo "No available opener program: $openers"
+    exit 1
+}
+
+### Aliases
 alias ..='cd ..'
 alias ...='cd ../..'
 alias ....='cd ../../..'
 alias cpclip='xclip -o | xclip -sel clip'
-
-function setcpugov { for i in 0 1; do cpufreq-selector -c $i -g $1; done }
-function getcpugov { cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor; }
-function getcpuavailgov { cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_available_governors; }
-function getcpufreq { cat /proc/cpuinfo | grep "cpu MHz"; }
-
-function mkcd { mkdir $1 && cd $1; }
-function cdls { cd $1 && ls; }
 
 # virtualenvwrapper
 export WORKON_HOME="$HOME/.virtualenvs"
@@ -150,3 +173,6 @@ set -o vi
 
 ## tmux
 alias tmux='TERM=screen-256color-bce tmux'
+
+## fuzzyfinder
+[ -f ~/.fzf.bash ] && source ~/.fzf.bash

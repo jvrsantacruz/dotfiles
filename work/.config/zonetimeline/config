@@ -1,2 +1,2 @@
 [general]
-zones = ["Europe/Madrid", "America/Buenos_Aires", "UTC"]
+zones = ["Europe/Madrid", "America/Buenos_Aires", "UTC", "US/Central"]
