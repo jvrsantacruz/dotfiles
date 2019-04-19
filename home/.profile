@@ -32,5 +32,5 @@ if [ -d "$SDBK" ]; then
 	mount -i "$SDBK"
 fi
 
-export EDITOR=vim
+export EDITOR=nvim
 export IPOD_MOUNTPOINT=/media/IARL
