@@ -166,7 +166,6 @@ alias cpclip='xclip -o | xclip -sel clip'
 export WORKON_HOME="$HOME/.virtualenvs"
 source `which virtualenvwrapper.sh`
 export PATH=$HOME/.local/bin:$PATH
-export EDITOR=nvim
 
 # Set console in vi mode
 set -o vi
