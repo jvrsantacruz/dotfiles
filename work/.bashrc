@@ -239,6 +239,10 @@ function unclip {
     xsel --output --clipboard
 }
 
+function casify {
+    sed -e 's@\([0-9]\{6\}\)@[\1](https://teg.avature.net/#Case/\1)@g'
+}
+
 # Alias definitions.
 # You may want to put all your additions into a separate file like
 # ~/.bash_aliases, instead of adding them here directly.
