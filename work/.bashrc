@@ -150,7 +150,7 @@ function _command_exists {
 }
 
 function go {
-    local openers="xdg-open" "gnome-open"
+    local openers="xdg-open gnome-open"
     for opener in $openers; do
         if _command_exists "$opener"; then
             $opener $@
