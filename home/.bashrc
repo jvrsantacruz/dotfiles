@@ -86,6 +86,14 @@ alias l='ls -CF'
 #   sleep 10; alert
 alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
 
+
+function mkvenv {
+    local name=$(basename $PWD)
+    echo Creating virtualenv $name
+    mkvirtualenv -a $PWD $@ $name;
+}
+
+
 function battery {
 	acpi_output=`acpi -p 2> /dev/null`
 	sign=
