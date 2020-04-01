@@ -312,6 +312,10 @@ function casify {
     sed -e 's@\([0-9]\{6\}\)@[\1](https://teg.avature.net/#Case/\1)@g'
 }
 
+function list_casify {
+    cases list --format md --columns id,name $@ | casify
+}
+
 # Alias definitions.
 # You may want to put all your additions into a separate file like
 # ~/.bash_aliases, instead of adding them here directly.
