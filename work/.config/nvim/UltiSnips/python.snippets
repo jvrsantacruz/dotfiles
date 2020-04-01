@@ -17,3 +17,18 @@ endsnippet
 snippet skiptest
 from nose import SkipTest; raise SkipTest()
 endsnippet
+
+snippet script
+#!/usr/bin/env python
+
+import argparse
+
+
+def main():
+	parser = argparse.ArgumentParser()
+	args = parser.parse_args()
+
+
+if __name__ == '__main__':
+	main()
+endsnippet
