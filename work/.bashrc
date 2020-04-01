@@ -139,11 +139,80 @@ function lxc_cp {
     tar cz "$src" | lxc exec "$name" tar xzf - "$dest"
 }
 
-function cr {
-    local branch="$1"
-    iatsCR -d gitlab $branch
+function _get_case {
+    local list_name="$1"
+    local case_id="$2"
+    local field="$3"
+
+    cases list $list_name -f id $case_id --format json | jq -r ".[0].\"$field\""
 }
 
+
+function _go_to_project {
+    local project=$1
+    if test -n "$project"; then
+        workon $(_project_alias $project)
+    fi
+}
+
+
+function cr {
+    local branch="$1"
+    local case_id="$1"
+    local project="$2"
+
+    if [[ "$case_id" =~ ^[0-9]+$ ]]; then
+        branch=$(_get_case cr $case_id Branch)
+        if [[ -z "$project" ]]; then
+            project=$(_get_case cr $case_id 'GIT Project')
+        fi
+    fi
+
+    _go_to_project $project
+    iatsCR --differ gitlab $branch
+}
+
+declare -A GITLAB_NAMESPACES_BY_PROJECT
+GITLAB_NAMESPACES_BY_PROJECT[puppet-hieradata]=puppet
+
+function _get_project_namespace {
+    local project="$1"
+    local default=avature
+
+    echo "${GITLAB_NAMESPACES_BY_PROJECT[$project]:-$default}"
+}
+
+
+function cropen {
+    local case_id="$1"
+    local project="$2"
+    local base_url="https://gitlab.xcade.net"
+    local branch namespace
+
+    branch=$(_get_case cr $case_id Branch)
+    if [[ -z "$project" ]]; then
+        project=$(_get_case cr $case_id 'GIT Project')
+    fi
+    namespace=$(_get_project_namespace "$project")
+
+    echo "Reviewing $namespace/$project ($branch)"
+    xdg-open $base_url/$namespace/$project/compare/master...$branch 2> /dev/null
+    cases open $1 &> /dev/null
+}
+
+
+function _project_alias {
+    local name="$1"
+    local alias=""
+
+    alias=$(grep "^${name}:" ~/dev/aliases | cut -f 2 -d :)
+
+    if [ -z "$alias" ]; then
+        echo $name
+    else
+        echo $alias
+    fi
+}
 
 function _command_exists {
     command -v "$1" &> /dev/null
