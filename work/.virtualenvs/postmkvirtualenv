@@ -1,3 +1,12 @@
 #!/bin/bash
 # This hook is sourced after a new virtualenv is activated.
-pip install --upgrade pip setuptools wheel pdbpp ipython neovim ropevim
+
+function setuptools {
+    if python -V 2>&1 | grep -q 'Python 2'; then
+        echo 'setuptools<=44'
+    else
+        echo 'setuptools'
+    fi
+}
+
+pip install --upgrade pip $(setuptools) wheel pdbpp ipython neovim ropevim
