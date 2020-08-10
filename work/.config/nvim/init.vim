@@ -1,11 +1,7 @@
 call plug#begin('~/.vim/plugged')
 
-Plug 'AndrewRadev/sideways.vim'
-Plug 'KabbAmine/zeavim.vim'
-Plug 'Matt-Deacalion/vim-systemd-syntax'
-Plug 'Shougo/denite.nvim'
-Plug 'Vimjas/vim-python-pep8-indent'
 Plug 'altercation/vim-colors-solarized'
+Plug 'AndrewRadev/sideways.vim'
 Plug 'arcticicestudio/nord-vim'
 Plug 'avakhov/vim-yaml'
 Plug 'cespare/vim-toml'
@@ -19,14 +15,17 @@ Plug 'flazz/vim-colorschemes'
 Plug 'google/yapf', { 'rtp': 'plugins/vim', 'for': 'python' }
 Plug 'hdima/python-syntax'
 Plug 'honza/vim-snippets'
+Plug 'https://gitlab.com/gi1242/vim-emoji-ab.git'
 Plug 'idanarye/vim-merginal'
 Plug 'jiangmiao/auto-pairs'
 Plug 'jmcantrell/vim-virtualenv'
 Plug 'jreybert/vimagit'
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 Plug 'junegunn/fzf.vim'
+Plug 'KabbAmine/zeavim.vim'
 Plug 'lepture/vim-jinja'
 Plug 'majutsushi/tagbar'
+Plug 'Matt-Deacalion/vim-systemd-syntax'
 Plug 'mhinz/vim-grepper'
 Plug 'mhinz/vim-signify'
 Plug 'mhinz/vim-startify'
@@ -34,6 +33,7 @@ Plug 'morhetz/gruvbox'
 Plug 'rodjek/vim-puppet'
 Plug 'roxma/nvim-completion-manager'
 Plug 'scrooloose/nerdtree'
+Plug 'Shougo/denite.nvim'
 Plug 'shumphrey/fugitive-gitlab.vim'
 Plug 'sirver/UltiSnips'
 Plug 'sjl/gundo.vim'
@@ -48,6 +48,7 @@ Plug 'tpope/vim-repeat'
 Plug 'tpope/vim-surround'
 Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
+Plug 'Vimjas/vim-python-pep8-indent'
 Plug 'vim-scripts/pyrex.vim'
 Plug 'vim-utils/vim-man'
 Plug 'w0rp/ale'
@@ -159,7 +160,7 @@ autocmd BufRead,BufNewFile *.py,*.pyx set filetype=python
 autocmd filetype python set nofoldenable  " Desactivar folding
 "autocmd filetype python setlocal equalprg=yapf  " Autoformatting
 autocmd filetype python nmap <leader>l :ALELint<CR>:lopen<CR>
-autocmd filetype python let g:ale_fixers = {'python': ['yapf', 'isort']}
+autocmd filetype python let g:ale_fixers = {'python': ['black', 'isort']}
 
 
 " Markdown/txt

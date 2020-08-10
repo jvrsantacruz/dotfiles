@@ -155,6 +155,18 @@ function _go_to_project {
     fi
 }
 
+function _project_alias {
+    local name="$1"
+    local alias=""
+
+    alias=$(grep "^${name}:" ~/dev/aliases | cut -f 2 -d :)
+
+    if [ -z "$alias" ]; then
+        echo $name
+    else
+        echo $alias
+    fi
+}
 
 function cr {
     local branch="$1"
@@ -182,36 +194,50 @@ function _get_project_namespace {
     echo "${GITLAB_NAMESPACES_BY_PROJECT[$project]:-$default}"
 }
 
+function crchanges {
+    local branch="$1"
+    local project="$2"
+    local namespace="$3"
+    local base_url="https://gitlab.xcade.net"
+
+    if [[ -z "$project" ]]; then
+        project=$(basename $PWD)
+    fi
+
+    if [[ -z "$namespace" ]]; then
+        namespace=$(_get_project_namespace "$project")
+    fi
+
+    echo "Reviewing $namespace/$project ($branch)"
+    xdg-open $base_url/$namespace/$project/compare/master...$branch 2> /dev/null
+}
 
 function cropen {
     local case_id="$1"
     local project="$2"
     local base_url="https://gitlab.xcade.net"
-    local branch namespace
+    local branch
 
     branch=$(_get_case cr $case_id Branch)
     if [[ -z "$project" ]]; then
         project=$(_get_case cr $case_id 'GIT Project')
     fi
-    namespace=$(_get_project_namespace "$project")
-
-    echo "Reviewing $namespace/$project ($branch)"
-    xdg-open $base_url/$namespace/$project/compare/master...$branch 2> /dev/null
+    crchanges "$branch" "$project"
     cases open $1 &> /dev/null
 }
 
+function crmerge {
+    local case_id="$1"
+    local project="$2"
 
-function _project_alias {
-    local name="$1"
-    local alias=""
-
-    alias=$(grep "^${name}:" ~/dev/aliases | cut -f 2 -d :)
-
-    if [ -z "$alias" ]; then
-        echo $name
-    else
-        echo $alias
+    branch=$(_get_case cr $case_id Branch)
+    if [[ -z "$project" ]]; then
+        project=$(_get_case cr $case_id 'GIT Project')
     fi
+    _go_to_project $project
+    git pull
+    iatsMerge origin/$branch
+    git push
 }
 
 function _command_exists {
@@ -314,6 +340,10 @@ function casify {
 
 function list_casify {
     cases list --format md --columns id,name $@ | casify
+}
+
+function open_last_auto_case {
+    cases clear; cases list auto --format plain --no-header | tail -n 1 | cases open 2>/dev/null
 }
 
 # Alias definitions.

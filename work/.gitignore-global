@@ -3,3 +3,4 @@
 *\.pybuild
 *\.deb
 *\.egg
+*\.egg-info
