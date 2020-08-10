@@ -1,5 +1,5 @@
 #!/bin/bash
 # This hook is sourced after every virtualenv is activated.
-if test -f vars; then
-    source vars
+if test -f dev.vars; then
+    source dev.vars
 fi
