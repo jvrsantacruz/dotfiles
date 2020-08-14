@@ -367,6 +367,9 @@ fi
 #if ! type workon &> /dev/null; then
 #    source /etc/bash_completion.d/virtualenvwrapper
 #fi
+export WORKON_HOME="$HOME/.virtualenvs"
+VIRTUALENVWRAPPER_SCRIPT=/usr/share/virtualenvwrapper/virtualenvwrapper.sh
+[ -f $VIRTUALENVWRAPPER_SCRIPT ] && source $VIRTUALENVWRAPPER_SCRIPT
 
 # Completions
 function _git_list_branches {
