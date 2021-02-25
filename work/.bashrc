@@ -235,6 +235,7 @@ function crmerge {
         project=$(_get_case cr $case_id 'GIT Project')
     fi
     _go_to_project $project
+    iatsSwitch master
     git pull
     iatsMerge origin/$branch
     git push
@@ -396,7 +397,11 @@ fi
 #xmodmap ~/.Xmodmap
 
 ## fuzzyfinder
-[ -f ~/.fzf.bash ] && source ~/.fzf.bash
+FZF_COMPLETION_PATH=$(realpath ~/.fzf/shell/completion.bash)
+if [ -f "$FZF_COMPLETION_PATH" ]; then
+    source "$FZF_COMPLETION_PATH"
+fi
+
 # disable tmux integration
 export FZF_TMUX=0
 export FZF_DEFAULT_COMMAND='ag --hidden -g "" --ignore "**.pyc" --ignore "**.deb" --ignore ".cache" --ignore ".tox" --ignore ".git" --ignore "**.egg-info" --ignore ".ropeproject"'
@@ -409,3 +414,5 @@ alias tmux='TERM=screen-256color-bce tmux'
 
 # Set console in vi mode
 set -o vi
+
+[ -f ~/.fzf.bash ] && source ~/.fzf.bash
