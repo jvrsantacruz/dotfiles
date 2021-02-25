@@ -1,6 +1,7 @@
 *.sw[a-z]
 work/.config/nvim/plugged
 work/.config/cases/config
+*/.virtualenvs
 home/.config/nvim/plugged
 home/.config/nvim/files
 */.config/nvim/files
