@@ -9,4 +9,6 @@ function setuptools {
     fi
 }
 
-pip install --upgrade pip $(setuptools) wheel pdbpp ipython neovim ropevim black isort
+pip install --upgrade pip \
+    $(setuptools) wheel pdbpp ipython neovim ropevim \
+    black isort virtualenvwrapper
