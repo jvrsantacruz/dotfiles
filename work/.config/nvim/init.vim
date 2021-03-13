@@ -4,11 +4,11 @@ Plug 'altercation/vim-colors-solarized'
 Plug 'AndrewRadev/sideways.vim'
 Plug 'arcticicestudio/nord-vim'
 Plug 'avakhov/vim-yaml'
+Plug 'beanworks/vim-phpfmt'
 Plug 'cespare/vim-toml'
 Plug 'chr4/nginx.vim'
 Plug 'chrisbra/unicode.vim'
 Plug 'davidhalter/jedi-vim'
-Plug 'dhruvasagar/vim-buffer-history'
 Plug 'elzr/vim-json'
 Plug 'ervandew/supertab'
 Plug 'fisadev/vim-isort'
@@ -27,12 +27,14 @@ Plug 'KabbAmine/zeavim.vim'
 Plug 'lepture/vim-jinja'
 Plug 'majutsushi/tagbar'
 Plug 'Matt-Deacalion/vim-systemd-syntax'
+Plug 'mgedmin/python-imports.vim'
 Plug 'mhinz/vim-grepper'
 Plug 'mhinz/vim-signify'
 Plug 'mhinz/vim-startify'
 Plug 'morhetz/gruvbox'
+Plug 'ncm2/ncm2'
 Plug 'rodjek/vim-puppet'
-Plug 'roxma/nvim-completion-manager'
+Plug 'roxma/yarp'
 Plug 'scrooloose/nerdtree'
 Plug 'Shougo/denite.nvim'
 Plug 'shumphrey/fugitive-gitlab.vim'
@@ -163,7 +165,6 @@ autocmd filetype python set nofoldenable  " Desactivar folding
 autocmd filetype python nmap <leader>l :ALELint<CR>:lopen<CR>
 autocmd filetype python let g:ale_fixers = {'python': ['black', 'isort']}
 
-
 " Markdown/txt
 autocmd BufRead,BufNewFile *.md,*.mk,*.markdown set filetype=markdown
 autocmd filetype markdown set textwidth=99
@@ -195,6 +196,9 @@ autocmd filetype javascript map <leader>l :SyntasticCheck<CR> :Errors<CR>
 " nginx
 autocmd BufRead,BufNewFile *.conf set filetype=nginx
 
+" php
+autocmd filetype php let g:ale_fixers = {'php': ['php_cs_fixer']}
+
 """"""""" Plugins """"""""""""
 
 "" Python-jedi
@@ -216,7 +220,9 @@ let g:ale_python_mypy_options = '--ignore-missing-imports'
 let g:ale_python_pylint_options = '--disable missing-docstring,
             \no-self-use,expression-not-assigned,invalid-name'
 let g:ale_python_isort_executable = 'isort'
-"autocmd filetype python let g:ale_fixers = ['isort', 'yapf']
+let g:ale_php_phpcs_executable='./vendor/bin/phpcs'
+let g:ale_php_php_cs_fixer_executable='./vendor/bin/php-cs-fixer'
+"let g:ale_fixers = {'php': ['php_cs_fixer']}
 map <leader>f :ALEFix<CR>
 
 "" NERDTree
