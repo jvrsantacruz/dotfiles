@@ -1,0 +1,51 @@
+{
+    "segments": {
+        "left": [
+            {
+                "priority": 50,
+                "function": "powerline.segments.common.time.date",
+                "args": {
+                    "format": "%H:%M",
+                    "istime": true
+                }
+            },
+            {
+                "function": "powerline.segments.shell.jobnum",
+                "priority": 20
+            },
+            {
+                "function": "powerline.segments.common.env.virtualenv",
+                "priority": 50,
+                "before": ""
+            },
+            {
+                "function": "powerline_gitstatus.gitstatus",
+                "priority": 40,
+                "args": { 
+                    "formats": {
+                        "branch": "\ue0a0 {}",
+                        "tag": " ★ {}",
+                        "behind": " ↓ {}",
+                        "ahead": " ↑ {}",
+                        "staged": " ● {}",
+                        "unmerged": " ✖ {}",
+                        "changed": " ✚ {}",
+                        "untracked": "",
+                        "stashed": ""
+                    }
+                }
+            },
+            {
+                "function": "powerline.segments.shell.cwd",
+                "priority": 10,
+                "args": {
+                    "dir_limit_depth": 4
+                }
+            },
+            {
+                "function": "powerline.segments.shell.last_pipe_status",
+                "priority": 10
+            }
+        ]
+    }
+}
