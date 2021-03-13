@@ -1,5 +1,6 @@
 {
   "groups": {
+    "virtualenv":             { "fg": "gray2",           "bg": "mediumcyan", "attrs": [] },
     "gitstatus":                 { "fg": "gray8",           "bg": "gray2", "attrs": [] },
     "gitstatus_branch":          { "fg": "gray8",           "bg": "gray2", "attrs": [] },
     "gitstatus_branch_clean":    { "fg": "green",           "bg": "gray2", "attrs": [] },
