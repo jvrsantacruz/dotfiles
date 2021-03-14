@@ -363,6 +363,7 @@ FZF_COMPLETION_PATH=$(realpath ~/.fzf/shell/completion.bash)
 if [ -f "$FZF_COMPLETION_PATH" ]; then
     source "$FZF_COMPLETION_PATH"
 fi
+[ -f ~/.fzf.bash ] && source ~/.fzf.bash
 
 # disable tmux integration
 export FZF_TMUX=0
@@ -376,5 +377,3 @@ alias tmux='TERM=screen-256color-bce tmux'
 
 # Set console in vi mode
 set -o vi
-
-[ -f ~/.fzf.bash ] && source ~/.fzf.bash
