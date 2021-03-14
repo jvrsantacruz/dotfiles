@@ -135,9 +135,7 @@ set history=1000 " remember commands and search history up to 1000
 set undolevels=1000
 
 """ Colors
-set t_Co=256
-set background=light
-color solarized
+color mustang
 
 " Change pop-up menu color (pink is horrible)
 highlight Pmenu ctermfg=0 ctermbg=2
