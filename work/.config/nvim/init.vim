@@ -211,6 +211,10 @@ let g:SuperTabDefaultCompletionType = "context"
 "" airline
 let g:airline_theme='base16'
 let g:airline_powerline_fonts=1
+" disable filetype section that takes a lot of space
+let g:airline_section_y=""
+" disable hunks as they take useful space
+let g:airline#extensions#hunks#enabled = 0
 let g:Powerline_symbols='unicode'
 
 "" Python Ale linters
