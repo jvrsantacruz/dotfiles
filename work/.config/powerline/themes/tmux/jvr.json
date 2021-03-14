@@ -1,0 +1,26 @@
+{
+    "spaces": 0,
+    "dividers": {
+        "left": {
+            "soft": ""
+        }
+    },
+    "segments": {
+        "right": [
+            {
+                "function": "powerline.segments.common.bat.battery"
+            },
+            {
+                "function": "powerline.segments.common.time.date"
+            },
+            {
+                "function": "powerline.segments.common.time.date",
+                "name": "time",
+                "args": {
+                    "format": "%H:%M",
+                    "istime": true
+                }
+            }
+        ]
+    }
+}
