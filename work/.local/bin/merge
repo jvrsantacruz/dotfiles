@@ -1,0 +1,141 @@
+#!/usr/bin/env python3.8
+import argparse
+import logging
+import os
+import re
+import subprocess
+import sys
+import typing as t
+from pathlib import Path
+import json
+
+logger = logging.getLogger("merge")
+DEFAULT_CONFIG = Path('~/.config/merge/config.json')
+
+
+def parse_case_id(text: str) -> t.Optional[str]:
+    match = re.search("\d+", text)
+    return match and int(match[0])
+
+
+def resolve_project_path(base_path: str, project: str):
+    project = Path(project) if project else Path(".").absolute()
+    if project.is_absolute():
+        return project
+
+    if not project.exists():
+        project = Path(base_path) / project
+
+    return project.expanduser().absolute()
+
+
+def load_config(path: t.Optional[str]) -> t.Dict
+    with Path(path or DEFAULT_CONFIG).expanduser().open() as stream:
+        config = json.load(stream)
+
+
+def run(command, *args, **kwargs):
+    logger.info("Running command %s", " ".join(command))
+    return subprocess.run(command, *args, **kwargs)
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("case", help="String containing case number")
+    parser.add_argument(
+        "-c", "--config", help=f"Path to config file default: {DEFAULT_CONFIG}"
+    )
+    parser.add_argument("-p", "--project", help="Name or path of project")
+    parser.add_argument(
+        "-b", "--base-path", help="Base path for project", default="~/dev"
+    )
+    parser.add_argument(
+        "-n", "--notify", help="Notify on rocketchat", action="append", default=[]
+    )
+    args = parser.parse_args()
+
+    logging.basicConfig(
+        level=logging.INFO, format="%(levelname)s %(asctime)s %(message)s"
+    )
+
+    config = load_config(args.config)
+
+    case_id = parse_case_id(args.case)
+    if case_id is None:
+        logger.error("Could not parse case id %s", case_id)
+        sys.exit(1)
+
+    project = resolve_project_path(args.base_path, args.project)
+    if not project.is_dir():
+        logger.error("Could not find project dir at %s", project)
+        sys.exit(1)
+
+    logger.info("Merging case %d into project %s", case_id, project.name)
+
+    os.chdir(str(project))
+    logger.info("Changed directory to %s", project)
+
+    if run(["git", "diff", "--quiet"]).returncode:
+        logger.error("Worktree is not clean. Stash your changes")
+        sys.exit(1)
+
+    if run(["iatsSwitch", "master"]).returncode:
+        logger.error("Could not move to master branch")
+        sys.exit(1)
+
+    if run(["git", "fetch", "--all"]).returncode:
+        logger.error("Could not pull master branch")
+        sys.exit(1)
+
+    if run(["git", "merge", "origin/master"]).returncode:
+        logger.error("Could not pull master branch")
+        sys.exit(1)
+
+    result = run(["git", "branch", "-la"], capture_output=True, encoding="utf8")
+    if result.returncode:
+        logger.error("Could not list tags")
+        sys.exit(1)
+
+    all_branches = [branch.strip() for branch in result.stdout.split("\n")]
+    branch_search = [
+        branch.replace("remotes/", "")
+        for branch in all_branches
+        if branch.startswith("remotes/") and str(case_id) in branch
+    ]
+    if not branch_search:
+        logger.error("Could not find %s in remote branches", case_id)
+        sys.exit(1)
+    branch = branch_search[0]
+
+    author = run(
+        ["git", "log", "-1", "--pretty='%ae'", branch],
+        capture_output=True,
+        encoding="utf8",
+    ).stdout.strip("'\"\t\n\r ")
+    if author:
+        author = "@" + author.split("@", 1)[0]
+        logging.info("Got author to notify on rocketchat %s", author)
+        args.notify = list(set(args.notify) | set([author]))
+
+    if run(["iatsMerge", branch]).returncode:
+        logger.error("Could not merge branch %s", branch)
+        sys.exit(1)
+
+    if run(["iatsPush"]).returncode:
+        logger.error("Could not push branch %s but it is ALREADY MERGED", branch)
+        sys.exit(1)
+    logger.info("Pushed branch %s", branch)
+
+    base_url = config['cases']['base_url'].rstrip('/')
+    case_url = f"{base_url}/{case_id}"
+    message = (
+        f":octopus: Merged case [{case_id}]({case_url}) "
+        f"branch {branch} into {project.name}"
+    )
+    for address in args.notify:
+        logging.info("Sending rocketchat message to %s", address)
+        run(["rchat", "send", "--to", address, message])
+
+
+if __name__ == "__main__":
+    main()
