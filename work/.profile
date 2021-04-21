@@ -31,8 +31,6 @@ export PATH="$PATH:$HOME/.rvm/bin" # Add RVM to PATH for scripting
 
 [[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm" # Load RVM into a shell session *as a function*
 
-export GITLAB_API_ENDPOINT="https://gitlab.xcade.net/api/v3"
-export GITLAB_API_PRIVATE_TOKEN="rRz-zSQr5WMKr-QtSjuX"
 export CHEATCOLORS=true
 export DEBEMAIL='javier.santacruz@avature.net'
 export DEBFULLNAME='Javier Santacruz'
