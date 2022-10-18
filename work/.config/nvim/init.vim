@@ -195,7 +195,7 @@ autocmd filetype javascript map <leader>l :SyntasticCheck<CR> :Errors<CR>
 autocmd BufRead,BufNewFile *.conf set filetype=nginx
 
 " php
-autocmd filetype php let g:ale_fixers = {'php': ['php_cs_fixer']}
+autocmd filetype php let g:ale_fixers = {'php': ['phpcbf']}
 
 """"""""" Plugins """"""""""""
 
@@ -223,8 +223,7 @@ let g:ale_python_pylint_options = '--disable missing-docstring,
             \no-self-use,expression-not-assigned,invalid-name'
 let g:ale_python_isort_executable = 'isort'
 let g:ale_php_phpcs_executable='./vendor/bin/phpcs'
-let g:ale_php_php_cs_fixer_executable='./vendor/bin/php-cs-fixer'
-"let g:ale_fixers = {'php': ['php_cs_fixer']}
+let g:ale_php_phpcbf_executable='./vendor/bin/phpcbf'
 map <leader>f :ALEFix<CR>
 
 "" NERDTree
