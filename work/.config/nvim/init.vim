@@ -197,6 +197,9 @@ autocmd BufRead,BufNewFile *.conf set filetype=nginx
 " php
 autocmd filetype php let g:ale_fixers = {'php': ['phpcbf']}
 
+" golang
+autocmd filetype go let g:ale_fixers = {'go': ['gofmt']}
+
 """"""""" Plugins """"""""""""
 
 "" Python-jedi
