@@ -207,19 +207,6 @@ function _command_exists {
     command -v "$1" &> /dev/null
 }
 
-function go {
-    local openers="xdg-open gnome-open"
-    for opener in $openers; do
-        if _command_exists "$opener"; then
-            $opener $@
-            return
-        fi
-    done
-
-    echo "No available opener program: $openers"
-    exit 1
-}
-
 function gitlab {
     local name=${1:-$(basename $(readlink -f .))}
     local user=${2:-avature}
