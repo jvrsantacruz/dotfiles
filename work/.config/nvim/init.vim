@@ -4,7 +4,7 @@ Plug 'altercation/vim-colors-solarized'
 Plug 'AndrewRadev/sideways.vim'
 Plug 'arcticicestudio/nord-vim'
 Plug 'avakhov/vim-yaml'
-Plug 'beanworks/vim-phpfmt'
+"Plug 'beanworks/vim-phpfmt'
 Plug 'cespare/vim-toml'
 Plug 'chr4/nginx.vim'
 Plug 'chrisbra/unicode.vim'
@@ -33,6 +33,7 @@ Plug 'mhinz/vim-signify'
 Plug 'mhinz/vim-startify'
 Plug 'morhetz/gruvbox'
 Plug 'ncm2/ncm2'
+"Plug 'phpactor/phpactor', {'for': 'php', 'tag': '*', 'do': 'composer install --no-dev -o'}
 Plug 'rodjek/vim-puppet'
 Plug 'roxma/yarp'
 Plug 'scrooloose/nerdtree'
@@ -48,6 +49,7 @@ Plug 'tpope/vim-fugitive'
 Plug 'tpope/vim-jdaddy'
 Plug 'tpope/vim-markdown'
 Plug 'tpope/vim-repeat'
+Plug 'tpope/vim-rhubarb'
 Plug 'tpope/vim-surround'
 Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
@@ -196,9 +198,14 @@ autocmd BufRead,BufNewFile *.conf set filetype=nginx
 
 " php
 autocmd filetype php let g:ale_fixers = {'php': ['phpcbf']}
+autocmd filetype php let g:ale_lint_on_save = 1
+autocmd filetype php let g:ale_lint_on_insert_leave = 0
+autocmd filetype php let g:ale_lint_on_text_changed = 0
 
 " golang
-autocmd filetype go let g:ale_fixers = {'go': ['gofmt']}
+autocmd filetype go set noexpandtab  " disable tab expanding for make
+autocmd filetype go let g:ale_fixers = {'go': ['gofmt', 'gofumpt', 'goimports', 'golines']}
+autocmd filetype go map <leader>d :GoDef<CR> :Errors<CR>
 
 """"""""" Plugins """"""""""""
 
@@ -220,7 +227,7 @@ let g:airline_section_y=""
 let g:airline#extensions#hunks#enabled = 0
 let g:Powerline_symbols='unicode'
 
-"" Python Ale linters
+"" Ale linters
 let g:ale_python_mypy_options = '--ignore-missing-imports'
 let g:ale_python_pylint_options = '--disable missing-docstring,
             \no-self-use,expression-not-assigned,invalid-name'

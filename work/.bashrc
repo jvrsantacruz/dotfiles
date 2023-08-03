@@ -66,6 +66,8 @@ function mkvenv {
     local name=$(basename $PWD)
     echo Creating virtualenv $name
     mkvirtualenv -a $PWD $@ $name;
+    echo Registering repository $name
+    mr register $PWD  || echo "Could not register repository $PWD"
 }
 
 function mkwork {
@@ -223,9 +225,9 @@ function listdir {
 function fetchall {
     local projects_root
     projects_root=$(readlink -f ${1:-.})
-
+ll --tags --prune --prune-tags
     parallel --no-notice \
-        git --git-dir "{}/.git" fetch \
+        git --git-dir "{}/.git" fetch --all --tags --prune --prune-tags \
         ::: $(listdir $projects_root)
 
     #for dirname in $(listdir $projects_root); do
@@ -296,6 +298,12 @@ function open_last_auto_case {
     cases clear; cases list auto --format plain --no-header | tail -n 1 | cases open 2>/dev/null
 }
 
+#function xls2csv {
+#    local source="$1"
+#    local outdir="$2"
+#    libreoffice --headless --convert-to csv "$source" --outdir "$outdir"
+#}
+
 # Alias definitions.
 # You may want to put all your additions into a separate file like
 # ~/.bash_aliases, instead of adding them here directly.
@@ -364,3 +372,5 @@ alias tmux='TERM=screen-256color-bce tmux'
 
 # Set console in vi mode
 set -o vi
+
+[[ -s "/home/javier.santacruz/.gvm/scripts/gvm" ]] && source "/home/javier.santacruz/.gvm/scripts/gvm"
