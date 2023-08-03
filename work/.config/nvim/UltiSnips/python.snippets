@@ -19,13 +19,20 @@ from nose import SkipTest; raise SkipTest()
 endsnippet
 
 snippet script
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import argparse
 
 
 def main():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser('My script')
+    subparsers = parser.add_subparsers(dest='command')
+    parse_command = subparsers.add_parser('blame', help='blame people')
+    blame.add_argument(
+        '--dry-run',
+        help='do not blame, just pretend',
+        action='store_true'
+    )
     args = parser.parse_args()
 
 

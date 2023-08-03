@@ -29,9 +29,9 @@ def resolve_project_path(base_path: str, project: str):
     return project.expanduser().absolute()
 
 
-def load_config(path: t.Optional[str]) -> t.Dict
+def load_config(path: t.Optional[str]) -> t.Dict:
     with Path(path or DEFAULT_CONFIG).expanduser().open() as stream:
-        config = json.load(stream)
+        return json.load(stream)
 
 
 def run(command, *args, **kwargs):
