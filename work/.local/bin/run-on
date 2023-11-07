@@ -1,0 +1,160 @@
+#!/usr/bin/python3.11
+
+import argparse
+import logging
+import random
+import subprocess
+import sys
+import time
+from dataclasses import dataclass
+from datetime import datetime, timedelta
+from functools import cached_property
+from pathlib import Path
+
+CACHE_DIR = Path.home() / ".cache" / "run-on"
+logger = logging.getLogger("run-on")
+
+
+@dataclass
+class Command:
+    args: list[str]
+
+    @cached_property
+    def id(self) -> str:
+        return "".join(self.args).translate(
+            str.maketrans({" ": "_", "/": "_", "-": "_"})
+        )
+
+    def run(self) -> bool:
+        return subprocess.run(self.args, check=False).returncode == 0
+
+
+@dataclass
+class History:
+    dir: Path
+
+    def make_dir(self):
+        self.dir.mkdir(parents=True, exist_ok=True)
+
+    def should_run(self, cmd: Command, every: int | None) -> bool:
+        if not every:
+            return True
+
+        if not (last_run := self.get_last_run(cmd)):
+            return True
+
+        since_last_run = self.minutes_since_last_run(last_run)
+        logger.info("Minutes since last run %d", since_last_run)
+        return since_last_run > every
+
+    def minutes_since_last_run(self, last_run: datetime) -> int:
+        return (datetime.now() - last_run).total_seconds() / 60
+
+    def set_last_run(self, cmd: Command):
+        (self.dir / cmd.id).touch()
+
+    def get_last_run(self, cmd: Command) -> datetime | None:
+        try:
+            return datetime.fromtimestamp((self.dir / cmd.id).stat().st_mtime)
+        except Exception:
+            return None
+
+
+def wait_for(jitter: int):
+    wait = random.randint(0, jitter)
+    if wait <= 0:
+        return
+    logger.info("Waiting %d minutes before running the command", wait)
+    time.sleep(wait * 60)
+
+
+def run_with_retries(cmd: Command, retries: int) -> bool:
+    for n in range(retries + 1):
+        if ok := cmd.run():
+            break
+
+        if n < retries:
+            logger.info("Retry %d/%d failed command %r", n, retries, cmd)
+            time.sleep(n**2 + random.randint(0, 100) / 100)
+    else:
+        logger.info("Giving up after %d retries for command %r", retries, cmd)
+
+    return ok
+
+
+def main():
+    parser = argparse.ArgumentParser("run-on")
+    parser.add_argument(
+        "-e",
+        "--every",
+        default=None,
+        type=int,
+        help="Run every amount of time in minutes",
+    )
+    parser.add_argument(
+        "-f",
+        "--no-fail",
+        default=False,
+        action="store_true",
+        help="Do not consider a run when it fails",
+    )
+    parser.add_argument(
+        "-c",
+        "--cache-dir",
+        type=Path,
+        default=CACHE_DIR,
+        help="Directory where to store run times",
+    )
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        default=False,
+        action="store_true",
+        help="Print info messages",
+    )
+    parser.add_argument(
+        "-j",
+        "--jitter",
+        default=0,
+        type=int,
+        help="Wait a max random amount of minutes before run",
+    )
+    parser.add_argument(
+        "-r",
+        "--retries",
+        default=0,
+        type=int,
+        help="Amount of retries if the command fails",
+    )
+    parser.add_argument("args", nargs="*")
+    args = parser.parse_args()
+
+    logging.basicConfig(
+        level=logging.INFO if args.verbose else logging.ERROR,
+        format="%(asctime)s [%(levelname)s] %(message)s",
+    )
+
+    history = History(args.cache_dir)
+    history.make_dir()
+
+    cmd = Command(args.args)
+    if not history.should_run(cmd, args.every):
+        logger.info(
+            "Refusing to run cmd yet %r should be every %r minutes", cmd, args.every
+        )
+        return
+
+    wait_for(args.jitter)
+    ok = run_with_retries(cmd, args.retries)
+
+    if not ok and args.no_fail:
+        logger.info("Not marking as run failed cmd %r", cmd)
+        return
+    logger.info("Marking cmd as run %r", cmd)
+    history.set_last_run(cmd)
+    if not ok:
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()
