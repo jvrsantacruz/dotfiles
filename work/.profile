@@ -28,12 +28,16 @@ fi
 
 # set PATH so it includes user's private bin if it exists
 if [ -d "$HOME/.local/sbin" ] ; then
-    PATH="$HOME/.local/bin:$PATH"
+    PATH="$HOME/.local/sbin:$PATH"
 fi
 
 # set PATH so it includes user's private bin if it exists
 if [ -d "$HOME/.gvm/bin" ] ; then
     PATH="$HOME/.gvm/bin:$PATH"
+fi
+
+if [ -d "/opt/puppetlabs/bin" ]; then
+	PATH="/opt/puppetlabs/bin:$PATH"
 fi
 
 export EDITOR=nvim

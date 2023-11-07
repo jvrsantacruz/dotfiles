@@ -63,6 +63,7 @@ function revagrant { vagrant destroy -f $1 && vagrant up $1; alert "finished cre
 
 # create virtualenv from project directory
 function mkvenv {
+    # export VIRTUALENVWRAPPER_VIRTUALENV="/home/javier.santacruz/.local/bin/python-venv-311"
     local name=$(basename $PWD)
     echo Creating virtualenv $name
     mkvirtualenv -a $PWD $@ $name;
