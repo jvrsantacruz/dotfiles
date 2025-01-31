@@ -48,3 +48,6 @@ export PATH="$PATH:$HOME/.rvm/bin" # Add RVM to PATH for scripting
 export CHEATCOLORS=true
 export DEBEMAIL='javier.santacruz@avature.net'
 export DEBFULLNAME='Javier Santacruz'
+
+# Added by LM Studio CLI (lms)
+export PATH="$PATH:/home/javier.santacruz/.lmstudio/bin"

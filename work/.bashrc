@@ -61,9 +61,18 @@ function v { vagrant $@; }
 # recreate vagrant environment
 function revagrant { vagrant destroy -f $1 && vagrant up $1; alert "finished creation of $1"; }
 
+function mkvenv311 {
+	export VIRTUALENVWRAPPER_VIRTUALENV="/home/javier.santacruz/.local/bin/python-venv-311"
+	mkvenv
+}
+
+function mkvenv312 {
+	export VIRTUALENVWRAPPER_VIRTUALENV="/home/javier.santacruz/.local/bin/python-venv-312"
+	mkvenv
+}
+
 # create virtualenv from project directory
 function mkvenv {
-    # export VIRTUALENVWRAPPER_VIRTUALENV="/home/javier.santacruz/.local/bin/python-venv-311"
     local name=$(basename $PWD)
     echo Creating virtualenv $name
     mkvirtualenv -a $PWD $@ $name;
@@ -288,11 +297,11 @@ function unclip {
 }
 
 function casify {
-    sed -e 's@\([0-9]\{6\}\)@[\1](https://teg.avature.net/#Case/\1)@g'
+    sed -e 's@\([0-9]\{6,7\}\)@[\1](https://teg.avature.net/#Case/\1)@g'
 }
 
-function list_casify {
-    cases list --format md --columns id,name $@ | casify
+function mdlist {
+    sed -e 's/^\s\+/- /g'
 }
 
 function open_last_auto_case {
@@ -375,3 +384,14 @@ alias tmux='TERM=screen-256color-bce tmux'
 set -o vi
 
 [[ -s "/home/javier.santacruz/.gvm/scripts/gvm" ]] && source "/home/javier.santacruz/.gvm/scripts/gvm"
+
+if command -V team &> /dev/null; then
+    eval "$(_TEAM_COMPLETE=bash_source team)"
+fi
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+# Added by LM Studio CLI (lms)
+export PATH="$PATH:/home/javier.santacruz/.lmstudio/bin"

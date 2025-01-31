@@ -77,7 +77,7 @@ def run_with_retries(cmd: Command, retries: int) -> bool:
             logger.info("Retry %d/%d failed command %r", n, retries, cmd)
             time.sleep(n**2 + random.randint(0, 100) / 100)
     else:
-        logger.info("Giving up after %d retries for command %r", retries, cmd)
+        logger.error("Giving up after %d retries for command %r", retries, cmd)
 
     return ok
 
