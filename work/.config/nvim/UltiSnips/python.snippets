@@ -22,21 +22,37 @@ snippet script
 #!/usr/bin/env python3
 
 import argparse
+import sys
+from datetime import datetime
+from functools import partial
+
+
+def list_all_command(args):
+    print("list all")
+
+
+def help(parser: argparse.ArgumentParser, args):
+    parser.print_help()
 
 
 def main():
-    parser = argparse.ArgumentParser('My script')
-    subparsers = parser.add_subparsers(dest='command')
-    parse_command = subparsers.add_parser('blame', help='blame people')
-    blame.add_argument(
-        '--dry-run',
-        help='do not blame, just pretend',
-        action='store_true'
-    )
+    parser = argparse.ArgumentParser("imdb")
+    parser.set_defaults(callback=partial(help, parser))
+    subparsers = parser.add_subparsers(dest="commands")
+
+    list_parser = subparsers.add_parser("list")
+    list_parser.set_defaults(callback=partial(help, list_parser))
+    list_subparsers = list_parser.add_subparsers(title="subcommands")
+
+    list_all_parser = list_subparsers.add_parser("all")
+    list_all_parser.set_defaults(callback=list_all_command)
+
     args = parser.parse_args()
+    result = args.callback(args)
+    sys.exit(0 if not result else result)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
 endsnippet
 

@@ -33,6 +33,7 @@ Plug 'mhinz/vim-signify'
 Plug 'mhinz/vim-startify'
 Plug 'morhetz/gruvbox'
 Plug 'ncm2/ncm2'
+Plug 'petobens/poet-v'
 "Plug 'phpactor/phpactor', {'for': 'php', 'tag': '*', 'do': 'composer install --no-dev -o'}
 Plug 'rodjek/vim-puppet'
 Plug 'roxma/yarp'
