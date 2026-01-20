@@ -1,5 +1,9 @@
 # Personal Preferences
 
+## Language Preference
+
+**Always respond in English**, even if I write to you in Spanish, unless I explicitly request a response in Spanish.
+
 ## Documentation & Note-Taking
 
 I maintain an Obsidian vault at `~/dev/notes/` for documentation.
