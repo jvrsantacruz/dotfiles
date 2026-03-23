@@ -1,1 +1,83 @@
-# TODO
+# Add ~/.local/bin to PATH
+export PATH="$HOME/.local/bin:$PATH"
+
+# Enable vi mode for command line editing
+bindkey -v
+
+# Optional: Reduce delay when switching modes (ESC key)
+export KEYTIMEOUT=1
+
+# Optional: Show vi mode indicator in prompt
+# bindkey -M vicmd 'k' history-search-backward
+# bindkey -M vicmd 'j' history-search-forward
+#
+alias ..="cd .."
+alias ...="cd ../.."
+alias ....="cd ../../.."
+
+function branch {
+    git rev-parse --abbrev-ref HEAD
+}
+
+function pr_url {
+    gh pr list --head "$1" --json url -q '.[].url' | head -n 1
+}
+
+function pr_open {
+    open "$(pr_url $(branch))"
+}
+
+function push_force {
+    git push origin $(branch) --force-with-lease
+}
+
+DD_USER_PREFIX="jvrsantacruz"
+
+function refresh_branch {
+    if [[ "$(branch)" != $DD_USER_PREFIX/* ]]; then
+        echo "Refusing to refresh a branch that is not $DD_USER_PREFIX/*"
+    fi
+
+    git fetch origin main
+    git rebase origin/main
+    push_force
+}
+
+function goto_worker {
+    cd ~/dd/dd-source/domains/ci-app/apps/apis/deployment-gates-worker/
+}
+
+# AI API Keys
+source .zshrc.env
+
+# Initialize Starship prompt
+eval "$(starship init zsh)"
+
+# Workforest - Git worktree manager
+export WORKFOREST_REPOS_DIR=~/dd
+export WORKFOREST_BASE=~/dd/workforest
+source ~/dev/workforest/shell/workforest-functions.zsh
+
+# workon - project navigator
+workon() {
+  if [[ "$1" == "--list" ]]; then
+    _workon "$@"
+    return
+  fi
+  local _path exit_code
+  _path=$(_workon "$@")
+  exit_code=$?
+  [[ $exit_code -ne 0 ]] && { echo "$_path" >&2; return $exit_code; }
+  [[ -n "$_path" ]] && cd "$_path"
+}
+
+_workon_complete() {
+  local completions
+  completions=($(_workon --complete "${words[2]}"))
+  compadd -a completions
+}
+if (( $+functions[compdef] )); then
+  compdef _workon_complete workon
+fi
+
+function cheats { glow -p ~/.config/nvim/cheatsheet.md }
