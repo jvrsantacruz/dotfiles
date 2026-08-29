@@ -8,3 +8,5 @@ fi
 export EDITOR=nvim
 eval "$(/opt/homebrew/bin/brew shellenv)"
 export PATH="/opt/homebrew/opt/libpq/bin:$PATH"
+
+eval "$(/opt/dogbrew/bin/dogbrew init sh)"
