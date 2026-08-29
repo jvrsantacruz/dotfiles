@@ -33,10 +33,6 @@ function pr_open {
 }
 
 function push_force {
-    git push origin $(branch) --force-with-lease
-}
-
-function push_force {
     local ref=$(branch)
 
     if [[ "$ref" == "main" || "$ref" == "master" ]]; then
@@ -48,7 +44,6 @@ function push_force {
     local expected_remote_ref=$(git rev-parse "origin/$ref")
     git push origin "$ref" --force-with-lease="$ref:$expected_remote_ref"
 }
-
 
 DD_USER_PREFIX="jvrsantacruz"
 
