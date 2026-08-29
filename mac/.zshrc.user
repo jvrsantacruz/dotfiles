@@ -103,6 +103,10 @@ fi
 
 function cheats { glow -p ~/.config/nvim/cheatsheet.md }
 
+# codex via the Datadog AI Gateway (prod). Codex has no apiKeyHelper, so the
+# ddtool token must exist before launch; this refreshes it on every invocation.
+alias codex='AI_GATEWAY_API_KEY="$(ddtool auth token rapid-ai-platform --datacenter us1.ddbuild.io)" codex -c "model_provider=ai-gateway"'
+
 function awsdd {
     aws-vault exec sso-prod-engineering -- aws $@
 }

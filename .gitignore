@@ -9,3 +9,7 @@ work/.config/cases/config
 
 # Claude Code config lives in its own repo (jvrsantacruz/skills)
 mac/.claude/
+
+# Codex config may hold gateway tokens
+mac/.codex/
+.codex/
