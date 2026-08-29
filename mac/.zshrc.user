@@ -4,6 +4,11 @@ export PATH="$HOME/.local/bin:$PATH"
 # Enable vi mode for command line editing
 bindkey -v
 
+# Open current command in $EDITOR when pressing 'v' in command mode
+autoload -Uz edit-command-line
+zle -N edit-command-line
+bindkey -M vicmd 'v' edit-command-line
+
 # Optional: Reduce delay when switching modes (ESC key)
 export KEYTIMEOUT=1
 
@@ -16,7 +21,7 @@ alias ...="cd ../.."
 alias ....="cd ../../.."
 
 function branch {
-    git rev-parse --abbrev-ref HEAD
+    git symbolic-ref --short HEAD
 }
 
 function pr_url {
@@ -30,6 +35,20 @@ function pr_open {
 function push_force {
     git push origin $(branch) --force-with-lease
 }
+
+function push_force {
+    local ref=$(branch)
+
+    if [[ "$ref" == "main" || "$ref" == "master" ]]; then
+        echo "push_force: refusing to force-push $ref" >&2
+        return 1
+    fi
+
+    git fetch origin "$ref" || return 1
+    local expected_remote_ref=$(git rev-parse "origin/$ref")
+    git push origin "$ref" --force-with-lease="$ref:$expected_remote_ref"
+}
+
 
 DD_USER_PREFIX="jvrsantacruz"
 
@@ -47,8 +66,12 @@ function goto_worker {
     cd ~/dd/dd-source/domains/ci-app/apps/apis/deployment-gates-worker/
 }
 
+function goto_orchestrator {
+    cd ~/dd/dd-go/ci-app/apps/deployment-gates-orchestrator/
+}
+
 # AI API Keys
-source .zshrc.env
+source ~/.zshrc.env
 
 # Initialize Starship prompt
 eval "$(starship init zsh)"
@@ -58,9 +81,12 @@ export WORKFOREST_REPOS_DIR=~/dd
 export WORKFOREST_BASE=~/dd/workforest
 source ~/dev/workforest/shell/workforest-functions.zsh
 
+# pi-subagents: isolated worktree base dir (fallback when config unset)
+export PI_SUBAGENTS_WORKTREE_DIR="$HOME/.pi/agent/worktrees"
+
 # workon - project navigator
 workon() {
-  if [[ "$1" == "--list" ]]; then
+  if [[ "$1" == "list" || "$1" == "archive" || "$1" == "-h" || "$1" == "--help" ]]; then
     _workon "$@"
     return
   fi
@@ -81,3 +107,7 @@ if (( $+functions[compdef] )); then
 fi
 
 function cheats { glow -p ~/.config/nvim/cheatsheet.md }
+
+function awsdd {
+    aws-vault exec sso-prod-engineering -- aws $@
+}
