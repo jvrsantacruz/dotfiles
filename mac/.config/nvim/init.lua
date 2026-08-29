@@ -422,7 +422,7 @@ require("lazy").setup({
       },
       -- DOCUMENTED: File selector for choosing context files
       selector = {
-        provider = "native",  -- Use native selector
+        provider = "telescope",
       },
       -- DOCUMENTED: Global instructions file (managed by stow)
       instructions_file = vim.fn.expand("~/.config/avante/avante.md"),
@@ -543,6 +543,9 @@ end, { desc = "Lint and show errors" })
 
 -- Cleanup trailing spaces
 keymap("n", "<leader>cs", [[:%s/\s\+$//g<CR>]], { desc = "Clean trailing spaces" })
+
+-- Cleanup em-dashes (replace with comma, per writing style preference)
+keymap("n", "<leader>c-", [[:%s/\s*—\s*/, /g<CR>]], { desc = "Clean em-dashes" })
 
 -- Fix tabs to spaces
 keymap("n", "<leader>ct", [[:%s/\t/    /g<CR>]], { desc = "Convert tabs to spaces" })
