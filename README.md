@@ -2,6 +2,18 @@
 
 My dotfiles for work and pleasure
 
+## Profiles
+
+| Profile | Machine | Notable contents |
+|---|---|---|
+| `mac` | this laptop | `.zshrc.user`, `.profile`, `.tmux.conf`, `.vimrc`, `.config/{nvim,avante}`, `CLAUDE.md` |
+| `work` | Linux work | `.bashrc`, `.gitconfig`, `.gitignore-global`, `.quiltrc`, `.local`, `.config/{nvim,powerline,dircolors}` |
+| `home` | personal Linux | `.bashrc`, `.gitconfig`, `.hgrc`, `.xinitrc`, `.Xmodmap`, `.config/nvim` |
+
+Not in the repo: `.zshrc.env` (secrets), `mac/.claude/` (own repo, `jvrsantacruz/skills`).
+
+## Install
+
 ```
 # Clone the repo
 git clone git@github.com:jvrsantacruz/dotfiles ~/.dotfiles
@@ -14,7 +26,8 @@ cd ~/.dotfiles && stow mac
 cd ~/.dotfiles && stow work
 ```
 
-Unversioned things:
+## Unversioned
+
 ```
 ln -s .config/nvim  .vim
 ```
