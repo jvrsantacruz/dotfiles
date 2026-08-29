@@ -8,3 +8,6 @@ home/.config/nvim/files
 
 # Local secrets (AI API keys), never committed
 .zshrc.env
+
+# Claude Code config lives in its own repo (jvrsantacruz/skills)
+mac/.claude/
