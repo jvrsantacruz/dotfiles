@@ -1,9 +1,7 @@
 *.sw[a-z]
-work/.config/nvim/plugged
 work/.config/cases/config
 */.virtualenvs
-home/.config/nvim/plugged
-home/.config/nvim/files
+*/.config/nvim/plugged
 */.config/nvim/files
 
 # Local secrets (AI API keys), never committed

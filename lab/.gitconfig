@@ -1,0 +1,8 @@
+[user]
+	email = javier.santacruz.lc@gmail.com
+	name = Javier Santacruz
+
+[color]
+	ui = True
+[push]
+	default = simple
