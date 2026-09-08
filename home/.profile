@@ -26,11 +26,5 @@ if [ -d "$HOME/.local/bin" ] ; then
     PATH="$HOME/.local/bin:$PATH"
 fi
 
-# Mount ecryptfs sdbk directory
-SDBK="/mnt/sdbk/backup"
-if [ -d "$SDBK" ]; then
-	mount -i "$SDBK"
-fi
-
 export EDITOR=nvim
 export IPOD_MOUNTPOINT=/media/IARL
