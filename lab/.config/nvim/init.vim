@@ -22,7 +22,6 @@ Plug 'mileszs/ack.vim'
 Plug 'morhetz/gruvbox'
 Plug 'scrooloose/nerdtree'
 Plug 'scrooloose/syntastic'
-Plug 'shumphrey/fugitive-gitlab.vim'
 Plug 'sirver/ultisnips'
 Plug 'sjl/gundo.vim'
 Plug 'terryma/vim-multiple-cursors'
@@ -233,10 +232,6 @@ set wildignore+=build/**,dist/**
 " fuzzy finding completion
 set rtp+=~/.fzf
 map <leader>t :FZF<CR>
-
-"" fugitive
-" Configure avature local github
-let g:fugitive_gitlab_domains = ['http://gitlab', 'http://gitlab.xcade.net']
 
 "" Gundo
 map <leader>u :GundoToggle<CR>
