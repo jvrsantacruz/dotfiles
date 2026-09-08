@@ -9,7 +9,7 @@ My dotfiles for work and pleasure
 | `mac` | this laptop | `.zshrc.user`, `.profile`, `.tmux.conf`, `.vimrc`, `.config/{nvim,avante}`, `CLAUDE.md` |
 | `work` | Linux work | `.bashrc`, `.gitconfig`, `.gitignore-global`, `.quiltrc`, `.local`, `.config/{nvim,powerline,dircolors}` |
 | `home` | personal Linux | `.bashrc`, `.gitconfig`, `.xinitrc`, `.Xmodmap`, `.config/nvim` |
-| `lab` | `jvrlab` homelab | kickstarted from `home`, minus the gitlab and ipod leftovers |
+| `lab` | `jvrlab` homelab | kickstarted from `home`, minus the gitlab config |
 
 Not in the repo: `.zshrc.env` (secrets), `mac/.claude/` (own repo, `jvrsantacruz/skills`).
 

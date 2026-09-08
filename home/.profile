@@ -27,4 +27,3 @@ if [ -d "$HOME/.local/bin" ] ; then
 fi
 
 export EDITOR=nvim
-export IPOD_MOUNTPOINT=/media/IARL
