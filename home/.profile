@@ -8,6 +8,11 @@
 # for ssh logins, install and configure the libpam-umask package.
 #umask 022
 
+# Which environment this machine is. The source of truth for the name: the
+# profile stowed from ~/.dotfiles and ~/.skills, and the directory under
+# ~/dev/lab/infra, are all this. Scripts read it instead of being told.
+export JVR_ENV=home
+
 # if running bash
 if [ -n "$BASH_VERSION" ]; then
     # include .bashrc if it exists
@@ -26,4 +31,12 @@ if [ -d "$HOME/.local/bin" ] ; then
     PATH="$HOME/.local/bin:$PATH"
 fi
 
+# set PATH so it includes user's private sbin if it exists
+if [ -d "$HOME/.local/sbin" ] ; then
+    PATH="$HOME/.local/sbin:$PATH"
+fi
+
 export EDITOR=nvim
+export CHEATCOLORS=true
+export DEBEMAIL='javier.santacruz.lc@gmail.com'
+export DEBFULLNAME='Javier Santacruz'

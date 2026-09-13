@@ -1,5 +1,4 @@
 *.sw[a-z]
-work/.config/cases/config
 */.virtualenvs
 */.config/nvim/plugged
 */.config/nvim/files
@@ -7,8 +6,9 @@ work/.config/cases/config
 # Local secrets (AI API keys), never committed
 .zshrc.env
 
-# Claude Code config lives in its own repo (jvrsantacruz/skills)
-mac/.claude/
+# Claude Code config lives in its own repo (jvrsantacruz/skills), checked out
+# at ~/.skills and stowed into ~/.claude
+*/.claude/
 
 # Codex config may hold gateway tokens
 mac/.codex/

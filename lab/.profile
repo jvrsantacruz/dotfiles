@@ -8,6 +8,11 @@
 # for ssh logins, install and configure the libpam-umask package.
 #umask 022
 
+# Which environment this machine is. The source of truth for the name: the
+# profile stowed from ~/.dotfiles and ~/.skills, and the directory under
+# ~/dev/lab/infra, are all this. Scripts read it instead of being told.
+export JVR_ENV=lab
+
 # if running bash
 if [ -n "$BASH_VERSION" ]; then
     # include .bashrc if it exists

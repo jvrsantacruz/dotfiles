@@ -1,0 +1,20 @@
+# stow's built-in defaults (providing this file replaces them)
+RCS
+.+,v
+CVS
+\.\#.+
+\.cvsignore
+\.svn
+_darcs
+\.hg
+\.git
+\.gitignore
+\.gitmodules
+.+~
+\#.*\#
+^/README.*
+^/LICENSE.*
+^/COPYING
+
+# Root-owned config, installed by hand — never link into $HOME
+^/etc

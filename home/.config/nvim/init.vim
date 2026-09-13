@@ -3,8 +3,7 @@ call plug#begin('~/.vim/plugged')
 Plug 'MarcWeber/vim-addon-mw-utils'
 Plug 'altercation/vim-colors-solarized'
 Plug 'amperser/proselint'
-Plug 'bufexplorer.zip'
-Plug 'cschlueter/vim-mustang'
+Plug 'cespare/vim-toml'
 Plug 'davidhalter/jedi-vim'
 Plug 'editorconfig/editorconfig-vim'
 Plug 'flazz/vim-colorschemes'
@@ -29,11 +28,15 @@ Plug 'terryma/vim-multiple-cursors'
 Plug 'tpope/vim-characterize'
 Plug 'tpope/vim-eunuch'
 Plug 'tpope/vim-fugitive'
+Plug 'tpope/vim-rhubarb'
 Plug 'tpope/vim-jdaddy'
 Plug 'tpope/vim-repeat'
 Plug 'tpope/vim-surround'
 Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
+Plug 'vim-scripts/AdvancedSorters'
+Plug 'vim-scripts/bufexplorer.zip'
+Plug 'vim-utils/vim-man'
 
 call plug#end()
 
@@ -115,7 +118,7 @@ set undolevels=1000
 
 """ Colors
 set t_Co=256
-set background=dark
+set background=light
 color mustang
 
 " Change pop-up menu color (pink is horrible)
@@ -126,7 +129,7 @@ highlight PmenuThumb ctermfg=0 ctermbg=7
 
 
 " Change BadSpell highlight red background, white letters
-highlight SpellBad term=standout ctermbg=1 ctermfg=7 guifg=White guibg=LightRed
+highlight SpellBad term=standout cterm=underline ctermfg=Red
 
 " Avoid bad whitespace
 highlight BadWhitespace ctermbg=red guibg=red  "Whitespace
@@ -273,3 +276,7 @@ map <leader>sw *``
 
 " Search visual selection
 map <leader>sv y/<C-R>"<CR>
+
+" Grep selected text
+nmap gs <plug>(GrepperOperator)
+xmap gs <plug>(GrepperOperator)

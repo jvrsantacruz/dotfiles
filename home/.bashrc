@@ -5,9 +5,9 @@
 # If not running interactively, don't do anything
 [ -z "$PS1" ] && return
 
-# don't put duplicate lines in the history. See bash(1) for more options
-# ... or force ignoredups and ignorespace
-HISTCONTROL=ignoredups:ignorespace
+# don't put duplicate lines or lines starting with space in the history.
+# See bash(1) for more options
+HISTCONTROL=ignoreboth
 
 # append to the history file, don't overwrite it
 shopt -s histappend
@@ -23,114 +23,69 @@ shopt -s checkwinsize
 # make less more friendly for non-text input files, see lesspipe(1)
 [ -x /usr/bin/lesspipe ] && eval "$(SHELL=/bin/sh lesspipe)"
 
-# set variable identifying the chroot you work in (used in the prompt below)
-if [ -z "$debian_chroot" ] && [ -r /etc/debian_chroot ]; then
-    debian_chroot=$(cat /etc/debian_chroot)
+### Prompt
+export POWERLINE_CONFIG_COMMAND=powerline-config
+if [ -f /usr/share/powerline/bindings/bash/powerline.sh ]; then
+    source /usr/share/powerline/bindings/bash/powerline.sh
 fi
 
-# set a fancy prompt (non-color, unless we know we "want" color)
-case "$TERM" in
-    xterm-color) color_prompt=yes;;
-esac
-
-# uncomment for a colored prompt, if the terminal has the capability; turned
-# off by default to not distract the user: the focus in a terminal window
-# should be on the output of commands, not on the prompt
-force_color_prompt=yes
-
-if [ -n "$force_color_prompt" ]; then
-    if [ -x /usr/bin/tput ] && tput setaf 1 >&/dev/null; then
-	# We have color support; assume it's compliant with Ecma-48
-	# (ISO/IEC-6429). (Lack of such support is extremely rare, and such
-	# a case would tend to support setf rather than setaf.)
-	color_prompt=yes
-    else
-	color_prompt=
-    fi
-fi
-
-if [ "$color_prompt" = yes ]; then
-    PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
-else
-    PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
-fi
-unset color_prompt force_color_prompt
-
-# If this is an xterm set the title to user@host:dir
-case "$TERM" in
-xterm*|rxvt*)
-    PS1="\[\e]0;${debian_chroot:+($debian_chroot)}\u@\h: \w\a\]$PS1"
-    ;;
-*)
-    ;;
-esac
-
-# enable color support of ls and also add handy aliases
+### Colours
 if [ -x /usr/bin/dircolors ]; then
-    test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
-    alias ls='ls --color=auto'
-    #alias dir='dir --color=auto'
-    #alias vdir='vdir --color=auto'
+    if [ -r ~/.config/dircolors/current ]; then
+        eval "$(dircolors -b ~/.config/dircolors/current)"
+    else
+        eval "$(dircolors -b)"
+    fi
 
+    alias ls='ls --color=auto'
     alias grep='grep --color=auto'
     alias fgrep='fgrep --color=auto'
     alias egrep='egrep --color=auto'
 fi
 
-# some more ls aliases
+### Aliases
 alias ll='ls -alF'
 alias la='ls -A'
 alias l='ls -CF'
+
+alias .='pwd'
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+alias cpclip='xclip -o | xclip -sel clip'
+
+## tmux
+alias tmux='TERM=screen-256color-bce tmux'
 
 # Add an "alert" alias for long running commands.  Use like so:
 #   sleep 10; alert
 alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
 
-
-function mkvenv {
-    local name=$(basename $PWD)
-    echo Creating virtualenv $name
-    mkvirtualenv -a $PWD $@ $name;
-}
-
-
-function battery {
-	acpi_output=`acpi -p 2> /dev/null`
-	sign=
-	if [ "`echo $acpi_output | fgrep discharging`" ] ; then
-		sign='-'
-	elif [ "`echo $acpi_output | fgrep charging`" ] ; then
-		sign='+'
-	fi
-
-	battery_level=`echo $acpi_output | sed -e 's/.*, \([0-9]\+%\).*/\1/'`
-
-	if [ "$battery_level" ]; then
-		echo "(${sign}${battery_level})"
-	fi
-}
-
-# Alias definitions.
-# You may want to put all your additions into a separate file like
-# ~/.bash_aliases, instead of adding them here directly.
-# See /usr/share/doc/bash-doc/examples in the bash-doc package.
-
 if [ -f ~/.bash_aliases ]; then
     . ~/.bash_aliases
 fi
 
-# enable programmable completion features (you don't need to enable
-# this, if it's already enabled in /etc/bash.bashrc and /etc/profile
-# sources /etc/bash.bashrc).
-if [ -f /etc/bash_completion ] && ! shopt -oq posix; then
-    . /etc/bash_completion
-fi
-
 ### Functions
+function _command_exists {
+    command -v "$1" &> /dev/null
+}
+
+# current date to mark files
+function datename { date "+%Y-%m-%d_%H-%M-%S"; }
 
 # current git branch
-function branch {
-    git name-rev --name-only HEAD
+function branch { git name-rev --name-only HEAD; }
+
+# Safe git push force
+function push_force {
+    local dest_branch=$(branch)
+    if test -z "$dest_branch"; then
+        echo "No current branch"
+        return 1
+    fi
+    set -x
+    git push origin "$dest_branch" --force-with-lease
+    set +x
 }
 
 # Nicer interactive rebase
@@ -138,21 +93,9 @@ function autorebase {
     git rebase --interactive --autosquash --autostash --keep-empty $@
 }
 
-# Safe git push force
-function push_force {
-    local dest_branch=$(branch)
-    if test -z "$dest_branch"; then
-        "No current branch"
-        return 1
-    fi
-    set -x
-    git push origin $(branch) --force-with-lease
-    set +x
-}
-
 # Open arbitrary uri
 function go {
-    local openers="xdg-open" "gnome-open"
+    local openers="xdg-open gnome-open"
     for opener in $openers; do
         if _command_exists "$opener"; then
             $opener $@
@@ -161,25 +104,82 @@ function go {
     done
 
     echo "No available opener program: $openers"
-    exit 1
+    return 1
 }
 
-### Aliases
-alias ..='cd ..'
-alias ...='cd ../..'
-alias ....='cd ../../..'
-alias cpclip='xclip -o | xclip -sel clip'
+### Syntax highlighting
+declare _highlight_command="highlight --out-format xterm256 --style zellner --failsafe --quiet"
 
-# virtualenvwrapper
+function ccat {
+    $_highlight_command $@
+}
+
+function cless {
+    ccat $@ | less -R
+}
+
+function files {
+    fzf --preview "$_highlight_command {}"
+}
+
+### Clipboard
+function clip {
+    xsel --input --clipboard --keep
+}
+
+function unclip {
+    xsel --output --clipboard
+}
+
+### Text
+function mdlist {
+    sed -e 's/^\s\+/- /g'
+}
+
+### Completion
+# enable programmable completion features (you don't need to enable
+# this, if it's already enabled in /etc/bash.bashrc and /etc/profile
+# sources /etc/bash.bashrc).
+if [ -f /etc/bash_completion ] && ! shopt -oq posix; then
+    . /etc/bash_completion
+fi
+
+function _git_list_branches {
+    # Removing the leading space and f*** asterisk
+    git branch --list --all --no-merged | cut -c 3-
+}
+
+function _fzf_complete_git_branches {
+    _fzf_complete "--reverse --multi" "$@" < <(_git_list_branches)
+}
+
+### virtualenvwrapper
 export WORKON_HOME="$HOME/.virtualenvs"
-[ -f "$(which virtualenvwrapper.sh)" ] && source `which virtualenvwrapper.sh`
-export PATH=$HOME/.local/bin:$PATH
+VIRTUALENVWRAPPER_SCRIPT=/usr/share/virtualenvwrapper/virtualenvwrapper.sh
+[ -f $VIRTUALENVWRAPPER_SCRIPT ] && source $VIRTUALENVWRAPPER_SCRIPT
+
+# create virtualenv from project directory
+function mkvenv {
+    local name=$(basename $PWD)
+    echo Creating virtualenv $name
+    mkvirtualenv -a $PWD $@ $name;
+}
+
+### fuzzyfinder
+FZF_COMPLETION_PATH=$(realpath ~/.fzf/shell/completion.bash 2>/dev/null)
+if [ -n "$FZF_COMPLETION_PATH" ] && [ -f "$FZF_COMPLETION_PATH" ]; then
+    source "$FZF_COMPLETION_PATH"
+fi
+[ -f ~/.fzf.bash ] && source ~/.fzf.bash
+
+# disable tmux integration
+export FZF_TMUX=0
+export FZF_DEFAULT_COMMAND='ag --hidden -g "" --ignore "**.pyc" --ignore "**.deb" --ignore ".cache" --ignore ".tox" --ignore ".git" --ignore "**.egg-info" --ignore ".ropeproject"'
+
+### node
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
 # Set console in vi mode
 set -o vi
-
-## tmux
-alias tmux='TERM=screen-256color-bce tmux'
-
-## fuzzyfinder
-[ -f ~/.fzf.bash ] && source ~/.fzf.bash
