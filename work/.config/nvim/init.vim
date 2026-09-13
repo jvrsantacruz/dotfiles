@@ -1,69 +1,48 @@
 call plug#begin('~/.vim/plugged')
 
+Plug 'MarcWeber/vim-addon-mw-utils'
 Plug 'altercation/vim-colors-solarized'
-Plug 'AndrewRadev/sideways.vim'
-Plug 'arcticicestudio/nord-vim'
-Plug 'avakhov/vim-yaml'
-"Plug 'beanworks/vim-phpfmt'
+Plug 'amperser/proselint'
 Plug 'cespare/vim-toml'
-Plug 'chr4/nginx.vim'
-Plug 'chrisbra/unicode.vim'
 Plug 'davidhalter/jedi-vim'
-Plug 'elzr/vim-json'
-Plug 'ervandew/supertab'
-Plug 'fisadev/vim-isort'
+Plug 'editorconfig/editorconfig-vim'
 Plug 'flazz/vim-colorschemes'
-Plug 'google/yapf', { 'rtp': 'plugins/vim', 'for': 'python' }
-Plug 'hdima/python-syntax'
-Plug 'honza/vim-snippets'
-Plug 'https://gitlab.com/gi1242/vim-emoji-ab.git'
-Plug 'idanarye/vim-merginal'
 Plug 'jiangmiao/auto-pairs'
 Plug 'jmcantrell/vim-virtualenv'
 Plug 'jreybert/vimagit'
-Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
+Plug 'junegunn/fzf'
 Plug 'junegunn/fzf.vim'
-Plug 'KabbAmine/zeavim.vim'
-Plug 'lepture/vim-jinja'
+Plug 'klen/python-mode'
 Plug 'majutsushi/tagbar'
-Plug 'Matt-Deacalion/vim-systemd-syntax'
-Plug 'mgedmin/python-imports.vim'
 Plug 'mhinz/vim-grepper'
 Plug 'mhinz/vim-signify'
 Plug 'mhinz/vim-startify'
+Plug 'mileszs/ack.vim'
 Plug 'morhetz/gruvbox'
-Plug 'ncm2/ncm2'
-Plug 'petobens/poet-v'
-"Plug 'phpactor/phpactor', {'for': 'php', 'tag': '*', 'do': 'composer install --no-dev -o'}
-Plug 'rodjek/vim-puppet'
-Plug 'roxma/yarp'
 Plug 'scrooloose/nerdtree'
-Plug 'Shougo/denite.nvim'
+Plug 'scrooloose/syntastic'
 Plug 'shumphrey/fugitive-gitlab.vim'
-Plug 'sirver/UltiSnips'
+Plug 'sirver/ultisnips'
 Plug 'sjl/gundo.vim'
-Plug 'szw/vim-g'
 Plug 'terryma/vim-multiple-cursors'
 Plug 'tpope/vim-characterize'
 Plug 'tpope/vim-eunuch'
 Plug 'tpope/vim-fugitive'
-Plug 'tpope/vim-jdaddy'
-Plug 'tpope/vim-markdown'
-Plug 'tpope/vim-repeat'
 Plug 'tpope/vim-rhubarb'
+Plug 'tpope/vim-jdaddy'
+Plug 'tpope/vim-repeat'
 Plug 'tpope/vim-surround'
 Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
-Plug 'Vimjas/vim-python-pep8-indent'
-Plug 'vim-scripts/pyrex.vim'
+Plug 'vim-scripts/AdvancedSorters'
+Plug 'vim-scripts/bufexplorer.zip'
 Plug 'vim-utils/vim-man'
-Plug 'w0rp/ale'
 
 call plug#end()
 
 """ Neovim
 if has('nvim')
-    let g:python_host_prog='/usr/bin/python3'
+    let g:python_host_prog='/usr/bin/python'
 endif
 
 """ Settings
@@ -138,6 +117,8 @@ set history=1000 " remember commands and search history up to 1000
 set undolevels=1000
 
 """ Colors
+set t_Co=256
+set background=light
 color mustang
 
 " Change pop-up menu color (pink is horrible)
@@ -145,6 +126,7 @@ highlight Pmenu ctermfg=0 ctermbg=2
 highlight PmenuSel ctermfg=0 ctermbg=7
 highlight PmenuSbar ctermfg=7 ctermbg=0
 highlight PmenuThumb ctermfg=0 ctermbg=7
+
 
 " Change BadSpell highlight red background, white letters
 highlight SpellBad term=standout cterm=underline ctermfg=Red
@@ -162,9 +144,10 @@ match BadWhitespace / ;/
 " Python
 autocmd BufRead,BufNewFile *.py,*.pyx set filetype=python
 autocmd filetype python set nofoldenable  " Desactivar folding
-"autocmd filetype python setlocal equalprg=yapf  " Autoformatting
-autocmd filetype python nmap <leader>l :ALELint<CR>:lopen<CR>
-autocmd filetype python let g:ale_fixers = {'python': ['black', 'isort']}
+"autocmd filetype python map <leader>l :PymodeLint<CR> :Errors<CR>
+autocmd filetype python map <leader>l :SyntasticCheck<CR> :Errors<CR>
+" Highlight max line marker
+
 
 " Markdown/txt
 autocmd BufRead,BufNewFile *.md,*.mk,*.markdown set filetype=markdown
@@ -185,57 +168,60 @@ autocmd filetype xml set shiftwidth=2
 autocmd BufRead,BufNewFile *.rb set filetype=ruby  " Autoindent with 2 spaces
 
 " Make
-autocmd filetype make set noexpandtab  " disable tab expanding for make
-
-" systemd
-autocmd BufRead,BufNewFile *.service,*.unit set filetype=systemd
+autocmd filetype make set expandtab!  " disable tab expanding for make
 
 " Javascript
 autocmd BufRead,BufNewFile *.js set filetype=javascript " Autoindent with 2 spaces
 autocmd filetype javascript map <leader>l :SyntasticCheck<CR> :Errors<CR>
 
-" nginx
-autocmd BufRead,BufNewFile *.conf set filetype=nginx
-
-" php
-autocmd filetype php let g:ale_fixers = {'php': ['phpcbf']}
-autocmd filetype php let g:ale_lint_on_save = 1
-autocmd filetype php let g:ale_lint_on_insert_leave = 0
-autocmd filetype php let g:ale_lint_on_text_changed = 0
-
-" golang
-autocmd filetype go set noexpandtab  " disable tab expanding for make
-autocmd filetype go let g:ale_fixers = {'go': ['gofmt', 'gofumpt', 'goimports', 'golines']}
-autocmd filetype go map <leader>d :GoDef<CR> :Errors<CR>
-
 """"""""" Plugins """"""""""""
 
+"" Ultisnips
+let g:UltiSnipsExpandTrigger="<tab>"
+let g:UltiSnipsJumpForwardTrigger="<c-i>"
+let g:UltiSnipsJumpForwardTrigger="<c-I>"
+let g:UltiSnipsEditSplit="vertical"
+
+"" Python-mode
+" No documentation
+let g:pymode_doc = 0
+" No code folding
+let g:pymode_folding = 0
+
+" Rope
+let g:pymode_rope = 0
+let g:pymode_rope_show_doc_bind = ''
+let g:pymode_rope_vim_completion = 0
+let g:pymode_rope_complete_on_dot = 0
+let g:pymode_rope_lookup_project = 0
+let g:pymode_lint_write = 1
+let g:pymode_lint_ignore = "E501,E128,E127,W0401,C0111"
+
 "" Python-jedi
-"let g:jedi#popup_on_dot = 1
-"let g:jedi#show_call_signatures = "1"
+"let g:jedi#popup_on_dot = 0
+let g:jedi#popup_select_first = 1
+let g:jedi#use_tabs_not_buffers = 0
+let g:jedi#show_call_signatures = "0"
 set completeopt=menuone,longest,preview
 
-"" Supertab
-" Autocomplete jedi with supertab
-let g:SuperTabDefaultCompletionType = "context"
+"" Syntastic
+let g:syntastic_check_on_open=0
+let g:syntastic_aggregate_errors = 1
+let g:syntastic_always_populate_loc_list = 0
+let g:syntastic_error_symbol = "✗"
+let g:syntastic_warning_symbol = "⚠"
+let g:syntastic_auto_loc_list = 2
+let g:syntastic_check_on_open = 0
+let g:syntastic_check_on_wq = 0
+let g:syntastic_python_checkers= ['pyflakes']
+
+"" Sparkup
+let g:sparkup = '~/.vim/ftplugin/html/sparkup.py'
 
 "" airline
 let g:airline_theme='base16'
 let g:airline_powerline_fonts=1
-" disable filetype section that takes a lot of space
-let g:airline_section_y=""
-" disable hunks as they take useful space
-let g:airline#extensions#hunks#enabled = 0
 let g:Powerline_symbols='unicode'
-
-"" Ale linters
-let g:ale_python_mypy_options = '--ignore-missing-imports'
-let g:ale_python_pylint_options = '--disable missing-docstring,
-            \no-self-use,expression-not-assigned,invalid-name'
-let g:ale_python_isort_executable = 'isort'
-let g:ale_php_phpcs_executable='./vendor/bin/phpcs'
-let g:ale_php_phpcbf_executable='./vendor/bin/phpcbf'
-map <leader>f :ALEFix<CR>
 
 "" NERDTree
 let NERDTreeWinSize = 20
@@ -256,22 +242,11 @@ map <leader>t :FZF<CR>
 let g:fugitive_gitlab_domains = ['http://gitlab', 'http://gitlab.xcade.net']
 
 "" Gundo
-if has('python3')
-    let g:gundo_prefer_python3 = 1
-endif
 map <leader>u :GundoToggle<CR>
 
 "" Tagbar
 let g:tagbar_autofocus = 1
 nmap <leader>h :TagbarToggle<CR>
-
-"" UltiSnips
-let g:UltiSnipsExpandTrigger="<tab>"
-let g:UltiSnipsJumpForwardTrigger="<c-b>"
-let g:UltiSnipsJumpBackwardTrigger="<c-z>"
-
-" If you want :UltiSnipsEdit to split your window.
-let g:UltiSnipsEditSplit="vertical"
 
 """" Remaps
 
@@ -295,6 +270,9 @@ map <leader>cd :cd %:p:h<CR>
 
 " Change window path to current file dir
 map <leader>cdl :lcd %:p:h<CR>
+
+" Search word under cursor without jumping
+map <leader>sw *``
 
 " Search visual selection
 map <leader>sv y/<C-R>"<CR>
