@@ -11,7 +11,7 @@ My dotfiles for work and pleasure
 | `home` | personal Linux | `.bashrc`, `.gitconfig`, `.xinitrc`, `.Xmodmap`, `.config/nvim` |
 | `lab` | `jvrlab` homelab | kickstarted from `home`, minus the gitlab config |
 
-Not in the repo: `.zshrc.env` (secrets), `mac/.claude/` (own repo, `jvrsantacruz/skills`).
+Not in the repo: `.zshrc.env` (secrets), `mac/.claude/` (own repo, `jvrsantacruz/skills`, checked out at `~/.skills` and stowed into `~/.claude`).
 
 ## Install
 
