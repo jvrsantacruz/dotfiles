@@ -237,10 +237,6 @@ set wildignore+=build/**,dist/**
 set rtp+=~/.fzf
 map <leader>t :FZF<CR>
 
-"" fugitive
-" Configure avature local github
-let g:fugitive_gitlab_domains = ['http://gitlab', 'http://gitlab.xcade.net']
-
 "" Gundo
 map <leader>u :GundoToggle<CR>
 
