@@ -102,19 +102,6 @@ workon() {
   [[ -n "$_path" ]] && cd "$_path"
 }
 
-# workon - project navigator
-workon() {
-  if [[ "$1" == "list" || "$1" == "archive" || "$1" == "-h" || "$1" == "--help" ]]; then
-    _workon "$@"
-    return
-  fi
-  local target exit_code
-  target=$(_workon "$@")
-  exit_code=$?
-  [[ $exit_code -ne 0 ]] && { echo "$target" >&2; return $exit_code; }
-  [[ -n "$target" ]] && cd "$target"
-}
-
 _workon_complete() {
   local completions
   completions=($(_workon --complete "${words[2]}"))
@@ -128,50 +115,50 @@ if (( $+functions[compdef] )); then
   compdef _workon_complete workon
 fi
 
-# `workon ...%%<TAB>` opens an interactive fzf search over all projects.
-# Text typed before %% becomes the initial fzf query (handled by fzf itself).
-# Requires fzf's shell integration: source <(fzf --zsh)
+## `workon ...%%<TAB>` opens an interactive fzf search over all projects.
+## Text typed before %% becomes the initial fzf query (handled by fzf itself).
+## Requires fzf's shell integration: source <(fzf --zsh)
+##
+## The %% trigger is set per keystroke instead of exporting
+## FZF_COMPLETION_TRIGGER globally, so fzf's own ** integration for other
+## commands stays untouched. TAB keeps whatever binding the user had.
+## Wrapping is deferred to the first prompt because this file is sourced
+## before fzf in .zshrc.
+#typeset -g WORKON_TAB_WRAPPED=0
+#workon-wrap-tab() {
+#  (( WORKON_TAB_WRAPPED )) && { precmd_functions=(${precmd_functions:#workon-wrap-tab}); return }
+#  if (( $+widgets[fzf-completion] )); then
+#    local orig
+#    orig="$(bindkey '^I')"
+#    orig="${orig##* }"
+#    zle -N workon-orig-tab "$orig"
+#    workon-smart-tab() {
+#      if [[ $LBUFFER == workon\ *%% ]]; then
+#        local saved_trigger=$FZF_COMPLETION_TRIGGER
+#        FZF_COMPLETION_TRIGGER='%%'
+#        zle workon-orig-tab
+#        FZF_COMPLETION_TRIGGER=$saved_trigger
+#      else
+#        zle workon-orig-tab
+#      fi
+#    }
+#    zle -N workon-smart-tab
+#    bindkey '^I' workon-smart-tab
+#    WORKON_TAB_WRAPPED=1
+#    precmd_functions=(${precmd_functions:#workon-wrap-tab})
+#  fi
+#}
+#autoload -Uz add-zsh-hook
+#add-zsh-hook precmd workon-wrap-tab
+#_fzf_complete_workon() {
+#  _fzf_complete --multi --reverse --prompt="workon> " -- "$@" < <(
+#    _workon --complete-fzf
+#  )
+#}
+#_fzf_complete_workon_post() {
+#  awk '{print $1}'
+#}
 #
-# The %% trigger is set per keystroke instead of exporting
-# FZF_COMPLETION_TRIGGER globally, so fzf's own ** integration for other
-# commands stays untouched. TAB keeps whatever binding the user had.
-# Wrapping is deferred to the first prompt because this file is sourced
-# before fzf in .zshrc.
-typeset -g WORKON_TAB_WRAPPED=0
-workon-wrap-tab() {
-  (( WORKON_TAB_WRAPPED )) && { precmd_functions=(${precmd_functions:#workon-wrap-tab}); return }
-  if (( $+widgets[fzf-completion] )); then
-    local orig
-    orig="$(bindkey '^I')"
-    orig="${orig##* }"
-    zle -N workon-orig-tab "$orig"
-    workon-smart-tab() {
-      if [[ $LBUFFER == workon\ *%% ]]; then
-        local saved_trigger=$FZF_COMPLETION_TRIGGER
-        FZF_COMPLETION_TRIGGER='%%'
-        zle workon-orig-tab
-        FZF_COMPLETION_TRIGGER=$saved_trigger
-      else
-        zle workon-orig-tab
-      fi
-    }
-    zle -N workon-smart-tab
-    bindkey '^I' workon-smart-tab
-    WORKON_TAB_WRAPPED=1
-    precmd_functions=(${precmd_functions:#workon-wrap-tab})
-  fi
-}
-autoload -Uz add-zsh-hook
-add-zsh-hook precmd workon-wrap-tab
-_fzf_complete_workon() {
-  _fzf_complete --multi --reverse --prompt="workon> " -- "$@" < <(
-    _workon --complete-fzf
-  )
-}
-_fzf_complete_workon_post() {
-  awk '{print $1}'
-}
-
 function cheats { glow -p ~/.config/nvim/cheatsheet.md }
 
 # codex via the Datadog AI Gateway (prod). Codex has no apiKeyHelper, so the
@@ -189,7 +176,8 @@ function hclaude {
     if ! nc -z 127.0.0.1 $port 2>/dev/null; then
         headroom proxy --port $port &>/tmp/headroom-proxy.log &
         disown
-        for i in {1..20}; do nc -z 127.0.0.1 $port 2>/dev/null && break; sleep 0.5; done
+        # first bind is slow (loads code-aware model); give it up to 60s
+        for i in {1..120}; do nc -z 127.0.0.1 $port 2>/dev/null && break; sleep 0.5; done
         nc -z 127.0.0.1 $port 2>/dev/null || { echo "headroom proxy failed to start, see /tmp/headroom-proxy.log"; return 1 }
     fi
     ANTHROPIC_BASE_URL=http://127.0.0.1:$port claude "$@"
