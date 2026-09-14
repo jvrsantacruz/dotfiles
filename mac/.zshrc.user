@@ -41,19 +41,29 @@ function push_force {
     fi
 
     git fetch origin "$ref" || return 1
-    local expected_remote_ref=$(git rev-parse "origin/$ref")
+    local expected_remote_ref=$(git rev-parse FETCH_HEAD) || return 1
     git push origin "$ref" --force-with-lease="$ref:$expected_remote_ref"
 }
 
 DD_USER_PREFIX="jvrsantacruz"
 
-function refresh_branch {
-    if [[ "$(branch)" != $DD_USER_PREFIX/* ]]; then
-        echo "Refusing to refresh a branch that is not $DD_USER_PREFIX/*"
+function master_branch {
+    if git ls-remote --exit-code --heads origin main >/dev/null 2>&1; then
+        echo main
+    elif git ls-remote --exit-code --heads origin master >/dev/null 2>&1; then
+        echo master
+    else
+        echo "refresh_branch: could not find origin/main or origin/master" >&2
+        return 1
     fi
+}
 
-    git fetch origin main
-    git rebase origin/main
+function refresh_branch {
+    local ref=$(branch)
+    local base_ref=$(master_branch)
+
+    git fetch origin "$base_ref" || return 1
+    git rebase "origin/$base_ref" || return 1
     push_force
 }
 
