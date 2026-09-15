@@ -169,16 +169,29 @@ function awsdd {
     aws-vault exec sso-prod-engineering -- aws $@
 }
 
-# claude through the headroom compression proxy. Starts the proxy on demand,
-# routes only this invocation via env var, leaves no claude config behind.
+# Ensure the headroom compression proxy listens on $1, starting it on demand.
+# First bind is slow (loads code-aware model); give it up to 60s.
+function _headroom-ensure-proxy {
+    local port=$1
+    nc -z 127.0.0.1 $port 2>/dev/null && return 0
+    headroom proxy --port $port &>/tmp/headroom-proxy.log &
+    disown
+    for i in {1..120}; do nc -z 127.0.0.1 $port 2>/dev/null && break; sleep 0.5; done
+    nc -z 127.0.0.1 $port 2>/dev/null || { echo "headroom proxy failed to start, see /tmp/headroom-proxy.log"; return 1 }
+}
+
+# claude through the headroom compression proxy. Routes only this invocation
+# via env var, leaves no claude config behind.
 function hclaude {
     local port=${HEADROOM_PORT:-8787}
-    if ! nc -z 127.0.0.1 $port 2>/dev/null; then
-        headroom proxy --port $port &>/tmp/headroom-proxy.log &
-        disown
-        # first bind is slow (loads code-aware model); give it up to 60s
-        for i in {1..120}; do nc -z 127.0.0.1 $port 2>/dev/null && break; sleep 0.5; done
-        nc -z 127.0.0.1 $port 2>/dev/null || { echo "headroom proxy failed to start, see /tmp/headroom-proxy.log"; return 1 }
-    fi
+    _headroom-ensure-proxy $port || return 1
     ANTHROPIC_BASE_URL=http://127.0.0.1:$port claude "$@"
+}
+
+# pi through the headroom proxy. The headroom pi extension picks up
+# HEADROOM_URL and repoints anthropic/openai providers for this invocation.
+function hpi {
+    local port=${HEADROOM_PORT:-8787}
+    _headroom-ensure-proxy $port || return 1
+    HEADROOM_URL=http://127.0.0.1:$port pi "$@"
 }
