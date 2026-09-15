@@ -1,0 +1,234 @@
+#!/usr/bin/env python3
+"""delegate: thin acpx wrapper for models.
+
+Encodes the repeated flag blocks, resolves the model family to a concrete id,
+and validates the report contract so callers cannot get the flags or the
+contract wrong. Orchestration decisions (tier, iterate, escalate) stay with the
+caller.
+"""
+
+import argparse
+import re
+import shutil
+import subprocess
+import sys
+
+DEFAULT_TIMEOUT = 600
+DEFAULT_MAX_TURNS = 40
+REPORT_CAP = 40
+
+# Session name role prefix decides the harness.
+HARNESS_FOR_PREFIX = {
+    "impl": "pi",
+    "test": "pi",
+    "explore": "pi",
+    "review": "codex",
+}
+DEFAULT_HARNESS = "pi"
+
+# Tier to model family, resolved against `pi --list-models` at open time.
+TIER_FAMILIES = {
+    1: "qwen|gemma",
+    2: "glm|deepseek",
+    3: "opus|codex",
+}
+
+REPORT_SECTIONS = ("files_changed", "commands_run", "notes")
+
+
+def harness_for(session, explicit):
+    if explicit:
+        return explicit
+    return HARNESS_FOR_PREFIX.get(session.split("-", 1)[0], DEFAULT_HARNESS)
+
+
+def resolve_model(tier, model_id):
+    if model_id:
+        return model_id
+    pattern = TIER_FAMILIES[tier]
+    listing = subprocess.run(
+        ["pi", "--list-models"], capture_output=True, text=True, check=False
+    )
+    for line in listing.stdout.splitlines():
+        parts = line.split()
+        if len(parts) >= 2 and re.search(pattern, parts[1], re.IGNORECASE):
+            # provider is column 1, model path is column 2; the id is the join.
+            return f"{parts[0]}/{parts[1]}"
+    sys.stderr.write(
+        f"delegate: no tier {tier} model (family {pattern!r}) in pi --list-models\n"
+    )
+    sys.exit(2)
+
+
+def validate_report(text):
+    if not text.strip():
+        return "empty output: agent ended without a final message"
+    low = text.lower()
+    for section in REPORT_SECTIONS:
+        if section not in low:
+            return f"missing section: {section}"
+    if not re.search(r"status\W*[:：]\s*(ok|blocked)", low):
+        return "status must be ok or blocked"
+    if len(text.splitlines()) > REPORT_CAP:
+        return f"{len(text.splitlines())} lines, over the {REPORT_CAP} line cap"
+    return None
+
+
+def subprocess_run(args, cmd, timeout=None):
+    """Run a command in the repo cwd, propagate the exit code."""
+    try:
+        proc = subprocess.run(cmd, cwd=args.repo, timeout=timeout)
+    except subprocess.TimeoutExpired:
+        sys.stderr.write(f"delegate: {cmd[0]} exceeded {timeout}s wrapper budget\n")
+        return 1
+    return proc.returncode
+
+
+def run_quiet(args, cmd):
+    """Run a turn-like command, validate the report, return exit code."""
+    try:
+        proc = subprocess.run(cmd, cwd=args.repo, capture_output=True, text=True,
+                              timeout=args.timeout + 120)
+    except subprocess.TimeoutExpired:
+        sys.stderr.write(f"delegate: acpx exceeded {args.timeout + 120}s\n")
+        return 1
+    report = proc.stdout
+    if proc.stderr.strip():
+        sys.stderr.write(proc.stderr)
+    sys.stdout.write(report)
+    if report and not report.endswith("\n"):
+        sys.stdout.write("\n")
+    reason = validate_report(report)
+    if reason:
+        sys.stderr.write(f"delegate: report invalid: {reason}\n")
+        return 1
+    return 0
+
+
+def perm_flag(args):
+    return "--deny-all" if args.deny_all else "--approve-reads"
+
+
+def cmd_open(args):
+    harness = harness_for(args.session, args.harness)
+    if harness == "codex":
+        # Codex review takes the harness default model; no --model.
+        cmd = ["acpx", "--cwd", args.repo, "codex", "sessions", "ensure",
+               "-s", args.session]
+    else:
+        model = resolve_model(args.tier, args.model)
+        sys.stderr.write(f"delegate: model {model}\n")
+        cmd = ["acpx", "--cwd", args.repo, "--model", model, "pi",
+               "sessions", "ensure", "-s", args.session]
+    return subprocess_run(args, cmd)
+
+
+def cmd_turn(args):
+    harness = harness_for(args.session, args.harness)
+    cmd = ["acpx", "--format", "quiet", perm_flag(args),
+           "--timeout", str(args.timeout), "--max-turns", str(args.max_turns),
+           "--cwd", args.repo, harness, "-s", args.session, "-f", args.spec]
+    return run_quiet(args, cmd)
+
+
+def cmd_prompt(args):
+    harness = harness_for(args.session, args.harness)
+    cmd = ["acpx", "--format", "quiet", perm_flag(args),
+           "--timeout", str(args.timeout), "--max-turns", str(args.max_turns),
+           "--cwd", args.repo, harness, "-s", args.session, args.text]
+    return run_quiet(args, cmd)
+
+
+def cmd_status(args):
+    harness = harness_for(args.session, args.harness)
+    cmd = ["acpx", "--cwd", args.repo, harness, "-s", args.session, "status"]
+    return subprocess_run(args, cmd)
+
+
+def cmd_close(args):
+    harness = harness_for(args.session, args.harness)
+    cmd = ["acpx", "--cwd", args.repo, harness, "sessions", "close", args.session]
+    return subprocess_run(args, cmd)
+
+
+def cmd_list(args):
+    harnesses = (["pi", "codex"] if args.harness == "all"
+                 else [args.harness])
+    code = 0
+    for harness in harnesses:
+        cmd = ["acpx", "--cwd", args.repo, harness,
+               "sessions", "list", "--local", "--filter-cwd", args.repo]
+        code = max(code, subprocess_run(args, cmd))
+    return code
+
+
+def build_parser():
+    p = argparse.ArgumentParser(
+        prog="delegate",
+        description="Thin acpx wrapper: open, turn, prompt, status, close, list.",
+    )
+    sub = p.add_subparsers(dest="command", required=True)
+
+    def add_common(sp):
+        sp.add_argument("repo", help="repository (cwd) for the delegation")
+        sp.add_argument("session", help="session name, e.g. impl-<slug>")
+        sp.add_argument("--harness", choices=["pi", "codex"], default=None,
+                        help="override the harness derived from the session role")
+
+    def add_turn_params(sp):
+        sp.add_argument("--deny-all", action="store_true",
+                        help="read-only: deny all permission requests")
+        sp.add_argument("--approve-reads", action="store_true",
+                        help="write: auto-approve reads (default)")
+        sp.add_argument("--timeout", type=int, default=DEFAULT_TIMEOUT)
+        sp.add_argument("--max-turns", type=int, default=DEFAULT_MAX_TURNS)
+
+    sp = sub.add_parser("open", help="ensure a session, resolving the model")
+    add_common(sp)
+    sp.add_argument("--tier", type=int, choices=[1, 2, 3], default=1)
+    sp.add_argument("--model", default=None,
+                    help="concrete provider/model id, overrides --tier")
+
+    sp = sub.add_parser("turn", help="send SPEC.md, print the validated report")
+    add_common(sp)
+    sp.add_argument("spec", help="path to SPEC.md")
+    add_turn_params(sp)
+
+    sp = sub.add_parser("prompt", help="send an inline delta, print the report")
+    add_common(sp)
+    sp.add_argument("text", help="the prompt text")
+    add_turn_params(sp)
+
+    for name, fn in (("status", cmd_status), ("close", cmd_close)):
+        sp = sub.add_parser(name, help=f"{name} a session")
+        add_common(sp)
+        sp.set_defaults(func=fn)
+
+    sp = sub.add_parser("list", help="list sessions for a repo")
+    sp.add_argument("repo")
+    sp.add_argument("--harness", choices=["pi", "codex", "all"], default="all")
+    sp.set_defaults(func=cmd_list)
+
+    p.set_defaults(func=None)
+    return p
+
+
+def main(argv=None):
+    parser = build_parser()
+    args = parser.parse_args(argv)
+    if shutil.which("acpx") is None:
+        sys.stderr.write("delegate: acpx not found on PATH\n")
+        return 2
+    handlers = {
+        "open": cmd_open,
+        "turn": cmd_turn,
+        "prompt": cmd_prompt,
+        "status": cmd_status,
+        "close": cmd_close,
+        "list": cmd_list,
+    }
+    return handlers[args.command](args)
+
+
+if __name__ == "__main__":
+    sys.exit(main())
