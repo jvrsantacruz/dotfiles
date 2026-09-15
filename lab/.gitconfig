@@ -6,3 +6,20 @@
 	ui = True
 [push]
 	default = simple
+
+[core]
+	pager = delta
+
+[interactive]
+	diffFilter = delta --color-only
+
+[delta]
+	line-numbers = true
+	navigate = true
+
+[merge]
+	# zdiff3 keeps the common lines out of the conflict markers.
+	conflictStyle = zdiff3
+
+[diff]
+	colorMoved = default

@@ -183,3 +183,10 @@ alias tmux='TERM=screen-256color-bce tmux'
 
 ## fuzzyfinder
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
+
+## searchable shell history, on ctrl-r
+# After fzf, which binds ctrl-r too: the last binding wins.
+# Up arrow left alone -- it should still walk this shell's own history.
+if command -v atuin >/dev/null; then
+    eval "$(atuin init bash --disable-up-arrow)"
+fi
