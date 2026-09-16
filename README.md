@@ -15,6 +15,16 @@ machine's whole setup.
 | `lab` | `jvrlab`, Lenovo T480 | kickstarted from `home`, minus the gitlab config; plus `etc/`, see [Caps Lock as F9](#caps-lock-as-f9-lab) |
 | `mac` | work macbook | `.zshrc.user`, `.profile`, `.tmux.conf`, `.vimrc`, `.config/{nvim,avante}` |
 
+`common/` holds what is identical on more than one machine, one copy. A profile
+takes an entry by linking it in, relatively, so the link resolves the same in a
+fresh clone:
+
+    home/.config/git/hooks/pre-commit -> ../../../../common/.config/git/hooks/pre-commit
+    lab/.config/git/hooks/pre-commit  -> ../../../../common/.config/git/hooks/pre-commit
+
+`common/` is never stowed itself; the profile is. A machine that should not
+have an entry simply does not link it, which is how `mac` has no commit hook.
+
 The environment name is not repeated by hand. `JVR_ENV` holds it, exported from
 each profile's `.profile` (and `mac/.zshrc.user`, since zsh does not read
 `.profile`), and is the source of truth.
