@@ -185,6 +185,7 @@ function _headroom-ensure-proxy {
 function hclaude {
     local port=${HEADROOM_PORT:-8787}
     _headroom-ensure-proxy $port || return 1
+    sleep 1
     ANTHROPIC_BASE_URL=http://127.0.0.1:$port claude "$@"
 }
 
