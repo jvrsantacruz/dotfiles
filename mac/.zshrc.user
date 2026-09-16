@@ -83,10 +83,13 @@ eval "$(starship init zsh)"
 
 # Searchable shell history behind a dedicated key: Ctrl-R maps to a fzf-style
 # history search over the atuin store instead of the zsh one.
-eval "$(atuin init zsh)"
+#
+# The init script is cached by provisioning so a new shell does not fork atuin
+# just to print it; fall back to eval on a machine that was never provisioned.
+source ~/.cache/atuin-init.zsh 2>/dev/null || eval "$(atuin init zsh)"
 
 # Smart cd: `z <dir>` jumps by frecency; `zi` opens an interactive picker.
-eval "$(zoxide init zsh)"
+source ~/.cache/zoxide-init.zsh 2>/dev/null || eval "$(zoxide init zsh)"
 
 # Delta as the git pager: side-by-side diffs with syntax highlighting for
 # `git diff` / `git log -p`.
