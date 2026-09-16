@@ -81,6 +81,17 @@ source ~/.zshrc.env
 # Initialize Starship prompt
 eval "$(starship init zsh)"
 
+# Searchable shell history behind a dedicated key: Ctrl-R maps to a fzf-style
+# history search over the atuin store instead of the zsh one.
+eval "$(atuin init zsh)"
+
+# Smart cd: `z <dir>` jumps by frecency; `zi` opens an interactive picker.
+eval "$(zoxide init zsh)"
+
+# Delta as the git pager: side-by-side diffs with syntax highlighting for
+# `git diff` / `git log -p`.
+export GIT_PAGER=delta
+
 # Workforest - Git worktree manager
 export WORKFOREST_REPOS_DIR=~/dd
 export WORKFOREST_BASE=~/dd/workforest
