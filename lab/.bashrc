@@ -183,6 +183,8 @@ alias tmux='TERM=screen-256color-bce tmux'
 
 ## fuzzyfinder
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
+# fzf walks the tree itself here. Vault sync dirs are noise in every search.
+export FZF_DEFAULT_OPTS='--walker-skip=.git,node_modules,.obsidian-mobile'
 
 ## searchable shell history, on ctrl-r
 # After fzf, which binds ctrl-r too: the last binding wins.
