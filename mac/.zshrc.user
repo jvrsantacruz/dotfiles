@@ -188,7 +188,7 @@ function awsdd {
 function _headroom-ensure-proxy {
     local port=$1
     nc -z 127.0.0.1 $port 2>/dev/null && return 0
-    headroom proxy --port $port &>/tmp/headroom-proxy.log &
+    HEADROOM_TELEMETRY=off headroom proxy --port $port --no-telemetry &>/tmp/headroom-proxy.log &
     disown
     for i in {1..120}; do nc -z 127.0.0.1 $port 2>/dev/null && break; sleep 0.5; done
     nc -z 127.0.0.1 $port 2>/dev/null || { echo "headroom proxy failed to start, see /tmp/headroom-proxy.log"; return 1 }
