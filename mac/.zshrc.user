@@ -204,9 +204,12 @@ function hclaude {
 }
 
 # pi through the headroom proxy. The headroom pi extension picks up
-# HEADROOM_URL and repoints anthropic/openai providers for this invocation.
+# HEADROOM_URL and repoints gateway providers; the proxy forwards back to
+# the Datadog gateway configured in models.json.
 function hpi {
     local port=${HEADROOM_PORT:-8787}
+    # proxy reads its upstream targets at startup, so export before it launches
+    export OPENAI_TARGET_API_URL=${OPENAI_TARGET_API_URL:-https://ai-gateway.us1.ddbuild.io/v1}
     _headroom-ensure-proxy $port || return 1
     HEADROOM_URL=http://127.0.0.1:$port pi "$@"
 }
