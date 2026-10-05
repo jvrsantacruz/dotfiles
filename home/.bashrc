@@ -181,5 +181,21 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
+### searchable shell history, on ctrl-r
+# After fzf, which binds ctrl-r too: the last binding wins. The up arrow is
+# left alone -- it should keep walking this shell's own history.
+#
+# The init scripts are rendered at provision time by the shell role rather than
+# printed by the binaries on every prompt. Live eval is the fallback for a
+# machine the playbook has not reached yet.
+for _tool in atuin zoxide; do
+    if [ -r "$HOME/.cache/$_tool-init.bash" ]; then
+        source "$HOME/.cache/$_tool-init.bash"
+    elif command -v "$_tool" >/dev/null; then
+        eval "$("$_tool" init bash $([ "$_tool" = atuin ] && echo --disable-up-arrow))"
+    fi
+done
+unset _tool
+
 # Set console in vi mode
 set -o vi
