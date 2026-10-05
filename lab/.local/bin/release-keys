@@ -1,0 +1,141 @@
+#!/usr/bin/env bash
+# release-keys - the signing keys a public project needs, made and stored in one command.
+#
+#   release-keys apt PROJECT          a new key for PROJECT's apt repository
+#   release-keys launchpad            my one key for every Launchpad PPA
+#   release-keys ci-launchpad PROJECT give PROJECT's CI the Launchpad key
+#   release-keys check PROJECT        what PROJECT holds: secrets, public key
+#
+# Each private key is backed up encrypted, with its revocation certificate,
+# in $RELEASE_KEYS_BACKUP (default ~/notes/tech). gpg asks for a passphrase
+# for each backup file: those passphrases are the only way back in.
+#
+# The apt key is made in a throwaway keyring and never touches mine: it goes
+# to the repository's Actions secrets, its public half to docs/ in the
+# checkout, its backup to disk, and nowhere else. It has no passphrase: the
+# key and a passphrase would sit side by side in the same secret store.
+#
+# Environment: RELEASE_KEYS_BACKUP, RELEASE_KEYS_CHECKOUTS (default ~/dev),
+# GH_OWNER (default: the gh user). Name and address come from git config.
+set -euo pipefail
+
+backup=${RELEASE_KEYS_BACKUP:-$HOME/notes/tech}
+checkouts=${RELEASE_KEYS_CHECKOUTS:-$HOME/dev}
+name=$(git config user.name)
+email=$(git config user.email)
+
+die() { echo "release-keys: $*" >&2; exit 1; }
+need() { command -v "$1" >/dev/null || die "needs $1"; }
+owner() { echo "${GH_OWNER:-$(gh api user -q .login)}"; }
+
+fingerprint() {  # fingerprint KEYRING-HOME QUERY
+  gpg --homedir "$1" --list-keys --with-colons "$2" | awk -F: '/^fpr/ { print $10; exit }'
+}
+
+revocation() {  # revocation HOME FPR OUT: a revocation certificate, reason unspecified
+  # gpg asks its questions on the terminal even with --command-fd, so the
+  # answers are fed through one: script(1) gives it a pseudo-terminal.
+  local home=$1 fpr=$2 out=$3
+  script -qec "printf 'y\n0\n\ny\n' | gpg --homedir '$home' --yes --pinentry-mode loopback \
+    --passphrase '' --command-fd 0 --armor --output '$out' --gen-revoke $fpr" /dev/null >/dev/null
+  grep -q 'revocation certificate' "$out" || die "could not make the revocation certificate"
+}
+
+keep() {  # keep HOME FPR LABEL: encrypted backup and revocation certificate
+  local home=$1 fpr=$2 label=$3 rev
+  rev="$(mktemp -d)/revocation.asc"
+  # Made first, so a failure leaves no backup half written.
+  if [[ -f $home/openpgp-revoc.d/$fpr.rev ]]; then
+    cp "$home/openpgp-revoc.d/$fpr.rev" "$rev"
+  else
+    revocation "$home" "$fpr" "$rev"
+  fi
+  mkdir -p "$backup"
+  gpg --homedir "$home" --armor --export-secret-keys "$fpr" \
+    | gpg --symmetric --output "$backup/$label-secret-key.asc.crypt"
+  gpg --symmetric --output "$backup/$label-revocation.asc.crypt" "$rev"
+  rm -rf "$(dirname "$rev")"
+  echo "backed up: $backup/$label-secret-key.asc.crypt, $backup/$label-revocation.asc.crypt"
+}
+
+# The throwaway keyring, global so the exit trap can still remove it.
+tmp=""
+
+apt_key() {
+  local project=$1 repo docs fpr
+  repo="$(owner)/$project"
+  docs="$checkouts/$project/docs"
+  gh repo view "$repo" >/dev/null 2>&1 || die "$repo does not exist: create it first"
+  [[ -d $docs ]] || die "$docs does not exist: the public key goes there"
+  [[ ! -e $backup/$project-apt-secret-key.asc.crypt ]] \
+    || die "a backup for $project already exists: move it aside to replace the key"
+  tmp=$(mktemp -d)
+  trap '[[ -n $tmp ]] && { gpgconf --homedir "$tmp" --kill gpg-agent 2>/dev/null; rm -rf "$tmp"; }' EXIT
+  chmod 700 "$tmp"
+  gpg --homedir "$tmp" --batch --passphrase '' \
+    --quick-generate-key "$project apt repository <$email>" rsa4096 sign 3y
+  fpr=$(fingerprint "$tmp" "$project apt repository")
+  echo t | gpg --homedir "$tmp" --batch --pinentry-mode loopback -u "$fpr" --clearsign >/dev/null \
+    || die "the new key does not sign"
+  keep "$tmp" "$fpr" "$project-apt"
+  gpg --homedir "$tmp" --armor --export-secret-keys "$fpr" | gh secret set APT_SIGNING_KEY -R "$repo"
+  gh secret delete APT_SIGNING_KEY_PASSPHRASE -R "$repo" 2>/dev/null || true
+  gpg --homedir "$tmp" --armor --export "$fpr" > "$docs/$project-archive-keyring.asc"
+  echo "public key: $docs/$project-archive-keyring.asc"
+  echo "fingerprint: $fpr"
+}
+
+launchpad_key() {
+  local home fpr
+  home=$(gpgconf --list-dirs homedir)
+  fpr=$(fingerprint "$home" "$name <$email>" || true)
+  if [[ -n $fpr ]]; then
+    echo "already in my keyring: $fpr"
+  else
+    gpg --quick-generate-key "$name <$email>" rsa4096 sign 3y   # asks for its passphrase
+    fpr=$(fingerprint "$home" "$name <$email>")
+    keep "$home" "$fpr" launchpad
+  fi
+  gpg --keyserver keyserver.ubuntu.com --send-keys "$fpr"
+  cat <<EOF
+fingerprint: $fpr
+1. https://launchpad.net/~/+editpgpkeys     paste the fingerprint; decrypt the mail it sends
+                                            with: gpg --decrypt, and open the link inside
+2. https://launchpad.net/codeofconduct      download it, then: gpg --clearsign UbuntuCodeofConduct-2.0.txt
+                                            and paste the .asc
+EOF
+}
+
+ci_launchpad() {
+  local project=$1 repo fpr
+  repo="$(owner)/$project"
+  fpr=$(fingerprint "$(gpgconf --list-dirs homedir)" "$name <$email>")
+  [[ -n $fpr ]] || die "no Launchpad key in my keyring: run release-keys launchpad"
+  gpg --armor --export-secret-keys "$fpr" | gh secret set LAUNCHPAD_KEY -R "$repo"
+  echo "the Launchpad key's passphrase, for $repo:"
+  gh secret set LAUNCHPAD_KEY_PASSPHRASE -R "$repo"
+}
+
+check() {
+  local project=$1 repo file
+  repo="$(owner)/$project"
+  file="$checkouts/$project/docs/$project-archive-keyring.asc"
+  gh secret list -R "$repo"
+  if [[ -f $file ]]; then
+    grep -q 'PRIVATE KEY' "$file" && die "$file holds a private key"
+    gpg --show-keys --with-fingerprint "$file"
+  else
+    echo "no public key at $file"
+  fi
+}
+
+need gpg
+need gh
+need script
+case ${1:-} in
+  apt) apt_key "${2:?usage: release-keys apt PROJECT}" ;;
+  launchpad) launchpad_key ;;
+  ci-launchpad) ci_launchpad "${2:?usage: release-keys ci-launchpad PROJECT}" ;;
+  check) check "${2:?usage: release-keys check PROJECT}" ;;
+  *) sed -n '2,7p' "$0" | sed 's/^# \{0,1\}//'; exit 2 ;;
+esac
