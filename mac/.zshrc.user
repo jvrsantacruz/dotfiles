@@ -230,3 +230,8 @@ function hpi {
     _headroom-ensure-proxy $port || return 1
     HEADROOM_URL=http://127.0.0.1:$port pi "$@"
 }
+
+# Docker clients reach the colima daemon. Testcontainers mounts the socket
+# from inside the VM, where it sits at the standard path.
+export DOCKER_HOST="unix://$HOME/.colima/default/docker.sock"
+export TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE=/var/run/docker.sock
