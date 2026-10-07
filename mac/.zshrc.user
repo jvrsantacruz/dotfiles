@@ -93,6 +93,15 @@ eval "$(starship init zsh)"
 # just to print it; fall back to eval on a machine that was never provisioned.
 source ~/.cache/atuin-init.zsh 2>/dev/null || eval "$(atuin init zsh)"
 
+# atuin grabs the up arrow for a global search; keep the arrow for this shell's
+# own history and leave the global atuin store behind Ctrl-R instead.
+bindkey -M emacs '^[[A' up-line-or-search
+bindkey -M viins '^[[A' history-search-backward
+bindkey -M vicmd '^[[A' history-search-backward
+bindkey -M emacs '^[OA' up-line-or-search
+bindkey -M viins '^[OA' history-search-backward
+bindkey -M vicmd '^[OA' history-search-backward
+
 # Smart cd: `z <dir>` jumps by frecency; `zi` opens an interactive picker.
 source ~/.cache/zoxide-init.zsh 2>/dev/null || eval "$(zoxide init zsh)"
 
