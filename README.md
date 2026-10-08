@@ -21,9 +21,10 @@ fresh clone:
 
     home/.config/git/hooks/pre-commit -> ../../../../common/.config/git/hooks/pre-commit
     lab/.config/git/hooks/pre-commit  -> ../../../../common/.config/git/hooks/pre-commit
+    mac/.config/git/hooks/pre-commit  -> ../../../../common/.config/git/hooks/pre-commit
 
 `common/` is never stowed itself; the profile is. A machine that should not
-have an entry simply does not link it, which is how `mac` has no commit hook.
+have an entry simply does not link it.
 
 The environment name is not repeated by hand. `JVR_ENV` holds it, exported from
 each profile's `.profile` (and `mac/.zshrc.user`, since zsh does not read

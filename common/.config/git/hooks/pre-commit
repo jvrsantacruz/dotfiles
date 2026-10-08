@@ -1,5 +1,5 @@
 #!/bin/sh
-# Refuse to commit staged secrets.
+# Refuse to commit staged secrets, and words that name my work.
 #
 # Lives in jvrsantacruz/dotfiles and is stowed to ~/.config/git/hooks/pre-commit.
 # Repos opt in by symlinking .git/hooks/pre-commit at it; infra/home/local.yml
@@ -20,6 +20,25 @@ if ! gitleaks protect --staged --redact --no-banner; then
     echo >&2
     echo "pre-commit: staged changes look like they contain a secret." >&2
     echo "            Take it out of the commit, or bypass with:" >&2
+    echo "            git commit --no-verify" >&2
+    exit 1
+fi
+
+# The denylist names my employer's words, so it lives outside every repository.
+# A repo that is about work turns it off:  git config hooks.denylist false
+denylist="$HOME/.config/gitleaks/denylist.toml"
+[ "$(git config --bool hooks.denylist)" = false ] && exit 0
+
+if [ ! -f "$denylist" ]; then
+    echo "pre-commit: $denylist is missing, refusing to commit unchecked." >&2
+    echo "            create it, or bypass with: git commit --no-verify" >&2
+    exit 1
+fi
+
+if ! gitleaks protect --staged --redact --no-banner --config "$denylist"; then
+    echo >&2
+    echo "pre-commit: staged changes name my work. This repository must not." >&2
+    echo "            Move the line to an untracked work file, or bypass with:" >&2
     echo "            git commit --no-verify" >&2
     exit 1
 fi
