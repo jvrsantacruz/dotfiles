@@ -137,6 +137,40 @@ function mdlist {
 }
 
 ### Completion
+# Symmetric gpg, one passphrase, no keyring involved. Both read a file named
+# as the argument, or stdin when there is none, and both write to stdout: a
+# function that never creates a file cannot overwrite the plaintext it was
+# given. Redirect to keep the result.
+#
+#   encrypt secrets.txt > secrets.asc
+#   pass show x | encrypt > x.asc
+#   decrypt secrets.asc
+#   decrypt < secrets.asc | less
+#
+# --no-symkey-cache, because the agent otherwise remembers the passphrase and
+# the next call succeeds without asking. Armoured so the output survives a
+# paste into a chat or a note.
+function encrypt {
+    case "${1:-}" in
+        -h|--help)
+            echo "usage: encrypt [file]   symmetric gpg, armoured, to stdout" >&2
+            return 2
+            ;;
+    esac
+    gpg --symmetric --armor --cipher-algo AES256 --no-symkey-cache \
+        --output - -- "${1:--}"
+}
+
+function decrypt {
+    case "${1:-}" in
+        -h|--help)
+            echo "usage: decrypt [file]   symmetric gpg, to stdout" >&2
+            return 2
+            ;;
+    esac
+    gpg --decrypt --no-symkey-cache --output - -- "${1:--}"
+}
+
 # enable programmable completion features (you don't need to enable
 # this, if it's already enabled in /etc/bash.bashrc and /etc/profile
 # sources /etc/bash.bashrc).
