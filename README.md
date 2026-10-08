@@ -34,7 +34,8 @@ it belongs in `/etc` and needs root, so `.stow-local-ignore` keeps it out. It
 holds the Caps Lock → F9 hwdb rule, matched to the XPS keyboard on `home` and to
 the T480 on `lab`.
 
-Not in the repo: `.zshrc.env` (secrets).
+Not in the repo, and never: `.zshrc.env` (secrets), `~/.zshrc.work` and `~/.profile.work`
+(work only: employer tools, internal hosts, work repos). This repository is public.
 
 ## Install
 

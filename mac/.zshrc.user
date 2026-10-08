@@ -72,14 +72,6 @@ function refresh_branch {
     push_force
 }
 
-function goto_worker {
-    cd ~/dd/dd-source/domains/ci-app/apps/apis/deployment-gates-worker/
-}
-
-function goto_orchestrator {
-    cd ~/dd/dd-go/ci-app/apps/deployment-gates-orchestrator/
-}
-
 # AI API Keys
 source ~/.zshrc.env
 
@@ -192,14 +184,6 @@ fi
 #
 function cheats { glow -p ~/.config/nvim/cheatsheet.md }
 
-# codex via the Datadog AI Gateway (prod). Codex has no apiKeyHelper, so the
-# ddtool token must exist before launch; this refreshes it on every invocation.
-alias codex='AI_GATEWAY_API_KEY="$(ddtool auth token rapid-ai-platform --datacenter us1.ddbuild.io)" codex -c "model_provider=ai-gateway"'
-
-function awsdd {
-    aws-vault exec sso-prod-engineering -- aws $@
-}
-
 # Ensure the headroom compression proxy listens on $1, starting it on demand.
 # First bind is slow (loads code-aware model); give it up to 60s.
 function _headroom-ensure-proxy {
@@ -222,11 +206,11 @@ function hclaude {
 
 # pi through the headroom proxy. The headroom pi extension picks up
 # HEADROOM_URL and repoints gateway providers; the proxy forwards back to
-# the Datadog gateway configured in models.json.
+# the gateway configured in models.json, whose address the work file sets.
 function hpi {
     local port=${HEADROOM_PORT:-8787}
     # proxy reads its upstream targets at startup, so export before it launches
-    export OPENAI_TARGET_API_URL=${OPENAI_TARGET_API_URL:-https://ai-gateway.us1.ddbuild.io/v1}
+    export OPENAI_TARGET_API_URL=${OPENAI_TARGET_API_URL:?set in ~/.zshrc.work}
     _headroom-ensure-proxy $port || return 1
     HEADROOM_URL=http://127.0.0.1:$port pi "$@"
 }
@@ -235,3 +219,7 @@ function hpi {
 # from inside the VM, where it sits at the standard path.
 export DOCKER_HOST="unix://$HOME/.colima/default/docker.sock"
 export TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE=/var/run/docker.sock
+
+# Work only settings: employer tools, internal hosts and repos. Never tracked
+# here, because this repository is public.
+[ -f ~/.zshrc.work ] && source ~/.zshrc.work

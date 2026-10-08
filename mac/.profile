@@ -14,4 +14,5 @@ export EDITOR=nvim
 eval "$(/opt/homebrew/bin/brew shellenv)"
 export PATH="/opt/homebrew/opt/libpq/bin:$PATH"
 
-eval "$(/opt/dogbrew/bin/dogbrew init sh)"
+# Work only login settings. Not tracked: this repository is public.
+[ -f "$HOME/.profile.work" ] && . "$HOME/.profile.work"

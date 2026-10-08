@@ -6,6 +6,10 @@
 # Local secrets (AI API keys), never committed
 .zshrc.env
 
+# Work only settings live in $HOME, never here: this repository is public
+.zshrc.work
+.profile.work
+
 # Claude Code config lives in its own repo (jvrsantacruz/skills), checked out
 # at ~/.skills and stowed into ~/.claude
 */.claude/
