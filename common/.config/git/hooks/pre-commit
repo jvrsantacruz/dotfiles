@@ -24,21 +24,17 @@ if ! gitleaks protect --staged --redact --no-banner; then
     exit 1
 fi
 
-# The denylist names my employer's words, so it lives outside every repository.
-# A repo that is about work turns it off:  git config hooks.denylist false
-denylist="$HOME/.config/gitleaks/denylist.toml"
-[ "$(git config --bool hooks.denylist)" = false ] && exit 0
+# The words name what a repository of mine must not, so the list lives outside
+# every repository. Without the list the check passes. A repository about work
+# turns it off:  git config hooks.privateWords false
+words="$HOME/.config/git/private-words"
+[ "$(git config --bool hooks.privateWords)" = false ] && exit 0
+[ -s "$words" ] || exit 0
 
-if [ ! -f "$denylist" ]; then
-    echo "pre-commit: $denylist is missing, refusing to commit unchecked." >&2
-    echo "            create it, or bypass with: git commit --no-verify" >&2
-    exit 1
-fi
-
-if ! gitleaks protect --staged --redact --no-banner --config "$denylist"; then
-    echo >&2
-    echo "pre-commit: staged changes name my work. This repository must not." >&2
-    echo "            Move the line to an untracked work file, or bypass with:" >&2
-    echo "            git commit --no-verify" >&2
+hits=$(git diff --cached -U0 --no-color | grep '^+' | grep -v '^+++' | grep -i -E -c -f "$words")
+if [ "$hits" -gt 0 ]; then
+    echo "pre-commit: $hits staged lines hold a private word. This repository must not." >&2
+    echo "            Find them: git diff --cached | grep -inEf $words" >&2
+    echo "            Move them to an untracked file, or bypass with: git commit --no-verify" >&2
     exit 1
 fi
