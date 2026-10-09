@@ -2,6 +2,10 @@
 # see /usr/share/doc/bash/examples/startup-files (in the package bash-doc)
 # for examples
 
+# Before the guard: bash reads this file for a command run over ssh, which is
+# not interactive, and ansible-playbook and the other uv tools live here.
+export PATH=$HOME/.local/bin:$PATH
+
 # If not running interactively, don't do anything
 [ -z "$PS1" ] && return
 
@@ -173,7 +177,6 @@ alias cpclip='xclip -o | xclip -sel clip'
 # virtualenvwrapper
 export WORKON_HOME="$HOME/.virtualenvs"
 [ -f "$(which virtualenvwrapper.sh)" ] && source `which virtualenvwrapper.sh`
-export PATH=$HOME/.local/bin:$PATH
 
 # Set console in vi mode
 set -o vi
