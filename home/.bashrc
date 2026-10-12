@@ -37,11 +37,14 @@ fi
 GIT_PS1_SHOWDIRTYSTATE=1
 PROMPT_DIRTRIM=4
 VIRTUAL_ENV_DISABLE_PROMPT=1
+# PS1 is single-quoted so the branch and virtualenv names are expanded once,
+# at display, and never as code: a branch named `$(cmd)` must print, not run.
 __prompt() {
-    local s=$? err=''
-    (( s )) && err="\[\e[91m\]$s "
-    PS1="\[\e[90m\]\A\[\e[0m\] ${VIRTUAL_ENV:+(${VIRTUAL_ENV##*/}) }\[\e[1m\]\w\[\e[0;31m\]$(__git_ps1 ' %s')\[\e[0m\]\n$err❯\[\e[0m\] "
+    local s=$?
+    __prompt_err=''
+    (( s )) && __prompt_err=$'\001\e[91m\002'"$s "
 }
+PS1='\[\e[90m\]\A\[\e[0m\] ${VIRTUAL_ENV:+(${VIRTUAL_ENV##*/}) }\[\e[1m\]\w\[\e[0;31m\]$(__git_ps1 " %s")\[\e[0m\]\n${__prompt_err}❯\[\e[0m\] '
 PROMPT_COMMAND="__prompt${PROMPT_COMMAND:+; $PROMPT_COMMAND}"
 
 ### Colours
