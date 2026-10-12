@@ -5,14 +5,14 @@
 local P = {
   light = {
     bg = "#F6F1E7", surface = "#FFFDF8", line = "#E6DCCB", fg = "#3A3A3A",
-    fg2 = "#6F675C", dim = "#7D7468", sel = "#E9D48F", cur = "#EFE7D8",
+    fg2 = "#6F675C", dim = "#7D7468", sel = "#E9D48F", cur = "#E9DFCC", find = "#BFD3E6",
     red = "#9A2B1C", green = "#2F6B46", yellow = "#7A5D14", blue = "#355A7A",
     magenta = "#86395D", cyan = "#2B6566",
     add = "#CFE3D4", change = "#F3E3B0", delete = "#F2C6C2", info = "#C9D9E8",
   },
   dark = {
     bg = "#3A3A3A", surface = "#4A4740", line = "#5A564E", fg = "#F6F1E7",
-    fg2 = "#C9C2B6", dim = "#8F887D", sel = "#6A655B", cur = "#454240",
+    fg2 = "#C9C2B6", dim = "#8F887D", sel = "#5F5A51", cur = "#454240", find = "#556372",
     red = "#E8907A", green = "#A9CDB2", yellow = "#E3C27A", blue = "#9DBBD9",
     magenta = "#DDA8BE", cyan = "#94C6C0",
     add = "#46534A", change = "#56503E", delete = "#5C4541", info = "#454E57",
@@ -44,7 +44,7 @@ local groups = {
   TabLineFill = { bg = c.surface },
   TabLineSel = { fg = on_accent, bg = accent, bold = true },
   Visual = { bg = c.sel },
-  Search = { fg = c.fg, bg = c.sel },
+  Search = { fg = c.fg, bg = c.find },
   IncSearch = { fg = on_accent, bg = accent },
   CurSearch = { fg = on_accent, bg = accent },
   MatchParen = { fg = accent, bold = true, underline = true },
