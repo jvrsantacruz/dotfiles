@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3840 2160" width="3840" height="2160">
+<!-- Budapest Night: flat shapes from brand-palette, one terracotta dot. -->
+<rect width="3840" height="2160" fill="#3A3A3A"/>
+<circle cx="2780" cy="1020" r="620" fill="#4A4740"/>
+<rect x="2040" y="1180" width="720" height="720" rx="22" fill="#45403A"/>
+<polygon points="3120,1900 3560,1900 3340,1520" fill="#524E46"/>
+<path d="M2300 760 a300 300 0 0 1 600 0 z" fill="#5A564E"/>
+<circle cx="3330" cy="560" r="64" fill="#A8432C"/>
+</svg>

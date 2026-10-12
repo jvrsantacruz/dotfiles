@@ -1,0 +1,116 @@
+-- Budapest, the brand palette: Day when the terminal is light, Night when it is
+-- dark. Neovim reads the terminal background at start and sets 'background',
+-- so this follows Ptyxis without a switch. Values from brand-palette in the
+-- Bible; why: 2026-10-11-terminal-wears-budapest.
+local P = {
+  light = {
+    bg = "#F6F1E7", surface = "#FFFDF8", line = "#E6DCCB", fg = "#3A3A3A",
+    fg2 = "#6F675C", dim = "#7D7468", sel = "#F3E3B0",
+    red = "#9A2B1C", green = "#2F6B46", yellow = "#7A5D14", blue = "#355A7A",
+    magenta = "#86395D", cyan = "#2B6566",
+    add = "#CFE3D4", change = "#F3E3B0", delete = "#F2C6C2", info = "#C9D9E8",
+  },
+  dark = {
+    bg = "#3A3A3A", surface = "#4A4740", line = "#5A564E", fg = "#F6F1E7",
+    fg2 = "#C9C2B6", dim = "#8F887D", sel = "#5A564E",
+    red = "#E8907A", green = "#A9CDB2", yellow = "#E3C27A", blue = "#9DBBD9",
+    magenta = "#DDA8BE", cyan = "#94C6C0",
+    add = "#46534A", change = "#56503E", delete = "#5C4541", info = "#454E57",
+  },
+}
+local accent, on_accent = "#A8432C", "#FFF8EE"
+
+vim.cmd("highlight clear")
+vim.g.colors_name = "budapest"
+local c = P[vim.o.background] or P.dark
+
+local groups = {
+  Normal = { fg = c.fg },
+  NormalFloat = { fg = c.fg, bg = c.surface },
+  FloatBorder = { fg = c.line, bg = c.surface },
+  Cursor = { fg = on_accent, bg = accent },
+  CursorLine = { bg = c.surface },
+  CursorColumn = { bg = c.surface },
+  ColorColumn = { bg = c.surface },
+  CursorLineNr = { fg = c.fg, bold = true },
+  LineNr = { fg = c.dim },
+  SignColumn = {},
+  Folded = { fg = c.fg2, bg = c.surface },
+  VertSplit = { fg = c.line },
+  WinSeparator = { fg = c.line },
+  StatusLine = { fg = c.fg, bg = c.line },
+  StatusLineNC = { fg = c.dim, bg = c.surface },
+  TabLine = { fg = c.dim, bg = c.surface },
+  TabLineFill = { bg = c.surface },
+  TabLineSel = { fg = on_accent, bg = accent, bold = true },
+  Visual = { bg = c.sel },
+  Search = { fg = c.fg, bg = c.change },
+  IncSearch = { fg = on_accent, bg = accent },
+  CurSearch = { fg = on_accent, bg = accent },
+  MatchParen = { fg = accent, bold = true, underline = true },
+  Pmenu = { fg = c.fg, bg = c.surface },
+  PmenuSel = { fg = on_accent, bg = accent },
+  PmenuSbar = { bg = c.surface },
+  PmenuThumb = { bg = c.line },
+  NonText = { fg = c.line },
+  Whitespace = { fg = c.line },
+  SpecialKey = { fg = c.line },
+  EndOfBuffer = { fg = c.bg },
+  Directory = { fg = c.blue },
+  Title = { fg = c.fg, bold = true },
+  ErrorMsg = { fg = c.red, bold = true },
+  WarningMsg = { fg = c.yellow },
+  MoreMsg = { fg = c.green },
+  Question = { fg = c.green },
+  ModeMsg = { fg = c.fg2 },
+
+  Comment = { fg = c.dim, italic = true },
+  Constant = { fg = c.yellow },
+  String = { fg = c.green },
+  Character = { fg = c.green },
+  Number = { fg = c.yellow },
+  Boolean = { fg = c.yellow },
+  Float = { fg = c.yellow },
+  Identifier = { fg = c.fg },
+  Function = { fg = c.blue },
+  Statement = { fg = c.magenta },
+  Keyword = { fg = c.magenta },
+  Conditional = { fg = c.magenta },
+  Repeat = { fg = c.magenta },
+  Operator = { fg = c.fg2 },
+  Exception = { fg = c.red },
+  PreProc = { fg = c.cyan },
+  Include = { fg = c.magenta },
+  Type = { fg = c.cyan },
+  Special = { fg = c.cyan },
+  Delimiter = { fg = c.fg2 },
+  Underlined = { underline = true },
+  Error = { fg = c.red, bold = true },
+  Todo = { fg = accent, bold = true },
+
+  DiffAdd = { bg = c.add },
+  DiffChange = { bg = c.change },
+  DiffDelete = { fg = c.red, bg = c.delete },
+  DiffText = { bg = c.change, bold = true },
+  Added = { fg = c.green },
+  Changed = { fg = c.yellow },
+  Removed = { fg = c.red },
+
+  DiagnosticError = { fg = c.red },
+  DiagnosticWarn = { fg = c.yellow },
+  DiagnosticInfo = { fg = c.blue },
+  DiagnosticHint = { fg = c.cyan },
+  DiagnosticUnderlineError = { undercurl = true, sp = c.red },
+  DiagnosticUnderlineWarn = { undercurl = true, sp = c.yellow },
+  DiagnosticUnderlineInfo = { undercurl = true, sp = c.blue },
+  DiagnosticUnderlineHint = { undercurl = true, sp = c.cyan },
+
+  SpellBad = { undercurl = true, sp = c.red },
+  SpellCap = { undercurl = true, sp = c.yellow },
+  SpellRare = { undercurl = true, sp = c.magenta },
+  SpellLocal = { undercurl = true, sp = c.cyan },
+  BadWhitespace = { bg = c.delete },
+}
+for name, spec in pairs(groups) do
+  vim.api.nvim_set_hl(0, name, spec)
+end

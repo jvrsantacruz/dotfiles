@@ -24,10 +24,25 @@ shopt -s checkwinsize
 [ -x /usr/bin/lesspipe ] && eval "$(SHELL=/bin/sh lesspipe)"
 
 ### Prompt
-export POWERLINE_CONFIG_COMMAND=powerline-config
-if [ -f /usr/share/powerline/bindings/bash/powerline.sh ]; then
-    source /usr/share/powerline/bindings/bash/powerline.sh
+# Plain, in the terminal's own colours so it follows Budapest Day and Night:
+# time dim, virtualenv, path bold, branch in red, which is terracotta on this
+# palette, with * changed and + staged. The arrow turns red with the exit code
+# after a failure.
+# git ships the helper; without it the branch is dropped, not the prompt.
+if [ -r /usr/lib/git-core/git-sh-prompt ]; then
+    . /usr/lib/git-core/git-sh-prompt
+else
+    __git_ps1() { :; }
 fi
+GIT_PS1_SHOWDIRTYSTATE=1
+PROMPT_DIRTRIM=4
+VIRTUAL_ENV_DISABLE_PROMPT=1
+__prompt() {
+    local s=$? err=''
+    (( s )) && err="\[\e[91m\]$s "
+    PS1="\[\e[90m\]\A\[\e[0m\] ${VIRTUAL_ENV:+(${VIRTUAL_ENV##*/}) }\[\e[1m\]\w\[\e[0;31m\]$(__git_ps1 ' %s')\[\e[0m\]\n$err❯\[\e[0m\] "
+}
+PROMPT_COMMAND="__prompt${PROMPT_COMMAND:+; $PROMPT_COMMAND}"
 
 ### Colours
 if [ -x /usr/bin/dircolors ]; then
@@ -209,6 +224,9 @@ fi
 # disable tmux integration
 export FZF_TMUX=0
 export FZF_DEFAULT_COMMAND='ag --hidden -g "" --ignore "**.pyc" --ignore "**.deb" --ignore ".cache" --ignore ".tox" --ignore ".git" --ignore "**.egg-info" --ignore ".ropeproject"'
+# The terminal's 16 colours, so fzf, bat and delta follow Budapest Day and Night.
+export FZF_DEFAULT_OPTS='--color=16'
+export BAT_THEME=ansi
 
 ### node
 export NVM_DIR="$HOME/.nvm"

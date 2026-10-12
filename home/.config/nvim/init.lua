@@ -98,12 +98,6 @@ vim.opt.listchars = { tab = ">·", trail = "·", extends = "#", nbsp = "·" }
 -- PLUGINS
 -- ============================================================================
 require("lazy").setup({
-  -- Color schemes
-  { "morhetz/gruvbox" },
-  { "altercation/vim-colors-solarized" },
-  { "arcticicestudio/nord-vim" },
-  { "folke/tokyonight.nvim", priority = 1000 },
-
   -- Treesitter (Modern syntax highlighting)
   --
   -- Pinned to `master`, and the branch is the whole point. The repository's
@@ -416,12 +410,10 @@ require("lazy").setup({
 -- ============================================================================
 -- COLORSCHEME
 -- ============================================================================
-vim.cmd("colorscheme gruvbox")
-vim.opt.background = "dark"
-
--- Highlight customization
-vim.api.nvim_set_hl(0, "SpellBad", { underline = true, fg = "Red" })
-vim.api.nvim_set_hl(0, "BadWhitespace", { bg = "red" })
+-- Budapest, in colors/budapest.lua. 'background' is left to Neovim, which
+-- reads it from the terminal, so the scheme follows Day and Night.
+vim.opt.termguicolors = true
+vim.cmd("colorscheme budapest")
 
 -- Match bad whitespace patterns (globally, except tabs)
 vim.fn.matchadd("BadWhitespace", [[^\s\+$]])  -- Trailing whitespace

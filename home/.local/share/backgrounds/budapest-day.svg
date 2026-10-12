@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3840 2160" width="3840" height="2160">
+<!-- Budapest Day: flat shapes from brand-palette, one terracotta dot. -->
+<rect width="3840" height="2160" fill="#F6F1E7"/>
+<circle cx="2780" cy="1020" r="620" fill="#F2C6C2"/>
+<rect x="2040" y="1180" width="720" height="720" rx="22" fill="#CFE3D4"/>
+<polygon points="3120,1900 3560,1900 3340,1520" fill="#C9D9E8"/>
+<path d="M2300 760 a300 300 0 0 1 600 0 z" fill="#F3E3B0"/>
+<circle cx="3330" cy="560" r="64" fill="#A8432C"/>
+</svg>

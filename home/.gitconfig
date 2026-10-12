@@ -13,6 +13,7 @@
 
 [delta]
     line-numbers = true
+    syntax-theme = ansi
     navigate = true
 
 [merge]
