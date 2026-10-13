@@ -1,5 +1,5 @@
 # The brand palette, Budapest: Day in light style, Night in dark. Values from
-# brand-palette in the Bible; why: 2026-10-11-terminal-wears-budapest.
+# brand-terminal in the Bible; why: 2026-10-11-terminal-wears-budapest.
 [Palette]
 Name=Budapest
 
@@ -17,10 +17,10 @@ Color4=#355A7A
 Color5=#86395D
 Color6=#2B6566
 Color7=#6F675C
-Color8=#7D7468
+Color8=#746B60
 Color9=#A8432C
 Color10=#3D7A54
-Color11=#8A6A1E
+Color11=#87681D
 Color12=#3F6A90
 Color13=#97466C
 Color14=#36787A

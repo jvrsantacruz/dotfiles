@@ -5,7 +5,7 @@
 local P = {
   light = {
     bg = "#F6F1E7", surface = "#FFFDF8", line = "#E6DCCB", fg = "#3A3A3A",
-    fg2 = "#6F675C", dim = "#7D7468", sel = "#E9D48F", cur = "#E9DFCC", find = "#BFD3E6",
+    fg2 = "#6F675C", dim = "#746B60", sel = "#E9D48F", cur = "#E9DFCC", find = "#BFD3E6",
     red = "#9A2B1C", green = "#2F6B46", yellow = "#7A5D14", blue = "#355A7A",
     magenta = "#86395D", cyan = "#2B6566",
     add = "#CFE3D4", change = "#F3E3B0", delete = "#F2C6C2", info = "#C9D9E8",
