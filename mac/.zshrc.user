@@ -112,6 +112,19 @@ export PI_SUBAGENTS_WORKTREE_DIR="$HOME/.pi/agent/worktrees"
 # research-web: session web search budget
 export PI_RESEARCH_WEB_MAX_SEARCHES_PER_SESSION=32
 
+# sesh - agent session navigator
+# Bare `sesh` opens the fzf picker; the resume command of the picked session
+# lands on the command line, ready to enter. With arguments, calls the binary.
+sesh() {
+  if [[ $# -gt 0 ]]; then
+    command sesh "$@"
+    return
+  fi
+  local _id
+  _id=$(command sesh) || return
+  [[ -n "$_id" ]] && print -z "$(command sesh resume --cd "$_id")"
+}
+
 # workon - project navigator
 workon() {
   if [[ "$1" == "list" || "$1" == "archive" || "$1" == "-h" || "$1" == "--help" ]]; then
