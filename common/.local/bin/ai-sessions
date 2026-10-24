@@ -1,0 +1,101 @@
+#!/usr/bin/env bash
+# Record pi/Claude session ids alive in tmux panes (save), and resume them
+# after a tmux-resurrect restore (restore). Wired from ~/.tmux.conf via
+# @resurrect-hook pre/post-save-all and post-restore-all.
+set -u
+STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}"
+STATE_FILE="$STATE_DIR/tmux-ai-sessions.txt"
+
+# Children of a pid, one per line.
+children_of() {
+    ps -o pid= --ppid "$1" 2>/dev/null | tr -d ' '
+}
+
+# pi's own environ lacks the session id; its tool-spawned children have it.
+pi_session_id() {
+    local pid=$1 d env
+    for d in $(ps -o pid= --ppid "$pid" 2>/dev/null | tr -d ' '); do
+        env=$(tr '\0' '\n' < "/proc/$d/environ" 2>/dev/null | grep -m1 -E '^PI_(SESSION_ID|SESSION_FILE)=')
+        if [ -n "$env" ]; then
+            case $env in
+                PI_SESSION_ID=*) echo "${env#PI_SESSION_ID=}" ;;
+                *) basename "${env#PI_SESSION_FILE=} .jsonl" | cut -d_ -f2 ;;
+            esac
+            return 0
+        fi
+        pi_session_id "$d" && return 0
+    done
+    return 1
+}
+
+# Breadth-first search below the pane shell for the first pi or claude
+# process, print "tool id".
+find_in_pane() {
+    local pid=$1
+    local queue=("$pid") seen=""
+    while [ ${#queue[@]} -gt 0 ]; do
+        local current=("${queue[@]}")
+        queue=()
+        for p in "${current[@]}"; do
+            case " $seen " in *" $p "*) continue ;; esac
+            seen="$seen $p"
+            local comm environ
+            comm=$(cat "/proc/$p/comm" 2>/dev/null) || continue
+            case $comm in
+                pi)
+                    id=$(pi_session_id "$p")
+                    # ponytail: id unknown for an idle pi, --continue resumes the
+                    # latest session in the restored cwd instead
+                    echo "pi ${id:--}"; return ;;
+                claude)
+                    environ=$(tr '\0' '\n' < "/proc/$p/environ" 2>/dev/null) || true
+                    id=$(awk -F= '$1 == "CLAUDE_CODE_SESSION_ID" {print $2}' <<<"$environ")
+                    if [ -z "$id" ]; then
+                        # headroom-wrapped claude has the id only in argv
+                        id=$(tr '\0' ' ' < "/proc/$p/cmdline" 2>/dev/null | awk '{for (i = 1; i < NF; i++) if ($i == "--resume" || $i == "--session-id") {print $(i + 1); exit}}')
+                    fi
+                    [ -n "$id" ] || id=-
+                    echo "claude $id"; return ;;
+            esac
+            mapfile -t kids < <(children_of "$p")
+            queue+=("${kids[@]}")
+        done
+    done
+    return 1
+}
+
+save() {
+    mkdir -p "$STATE_DIR"
+    : > "$STATE_FILE"
+    while IFS=$'\t' read -r target pid; do
+        [ -n "$pid" ] || continue
+        if hit=$(find_in_pane "$pid"); then
+            echo "$target $hit" >> "$STATE_FILE"
+        fi
+    done < <(tmux list-panes -a -F '#{session_name}:#{window_index}.#{pane_index}	#{pane_pid}')
+    # Print the ids so they are visible before a shutdown.
+    if [ -s "$STATE_FILE" ]; then
+        msg=$(tr '\n' ';' < "$STATE_FILE")
+        tmux display-message "AI sessions saved: $msg" 2>/dev/null
+    fi
+}
+
+restore() {
+    [ -f "$STATE_FILE" ] || exit 0
+    sleep 3  # let restored shells draw their prompt before typing into them
+    while read -r target tool id; do
+        tmux has-session -t "${target%%:*}" 2>/dev/null || continue
+        case $tool in
+            pi)     if [ "$id" = "-" ]; then tmux send-keys -t "$target" 'pi --continue' Enter
+                    else tmux send-keys -t "$target" "pi --session $id" Enter; fi ;;
+            claude) if [ "$id" = "-" ]; then tmux send-keys -t "$target" 'claude --continue' Enter
+                    else tmux send-keys -t "$target" "claude --resume $id" Enter; fi ;;
+        esac
+    done < "$STATE_FILE"
+}
+
+case "${1:-}" in
+    save) save ;;
+    restore) restore ;;
+    *) echo "usage: ai-sessions save|restore" >&2; exit 1 ;;
+esac
