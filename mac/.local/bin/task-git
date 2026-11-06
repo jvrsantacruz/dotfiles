@@ -1,0 +1,110 @@
+#!/usr/bin/env bash
+# Unsigned-first git for a task worktree: commit and push unsigned while
+# iterating, sign the whole pull request once, right before merge.
+#
+# Usage: task-git <command>
+#   init     this worktree only: unsigned commits, HTTPS push with a gh token,
+#            record this session as owner, phase=unsigned
+#   push     push the current branch; owner only, guarded by --force-with-lease
+#   sign     sign every PR commit once (skipped if already signed), reset the
+#            local branch to the signed history, phase=signed
+#   status   owner, phase, PR and whether the local branch matches the remote
+#
+# The owner is the Claude Code (or shell) process that ran init. A dead owner
+# can be taken over by running init again.
+#
+# Env: TASK_GIT_SIGN_CHECK  command run as `<cmd> <pr-url>`; exit 0 = all PR
+#      commits verified, so sign does nothing
+set -uo pipefail
+
+log() { echo "task-git: $*" >&2; }
+die() { log "$*"; exit 1; }
+usage() { sed -n '2,17p' "$0" | sed 's/^# \{0,1\}//' >&2; exit 64; }
+
+wcfg() { git config --worktree "$@"; }
+branch() { git symbolic-ref --short HEAD; }
+
+# ponytail: owner is the parent process id; a reused pid after reboot could
+# look alive, switch to a real session id if Claude Code exposes one
+me() { echo "${TASK_GIT_OWNER:-$(ps -o ppid= -p $PPID | tr -d ' ')}"; }
+alive() { [[ -n $1 ]] && kill -0 "$1" 2>/dev/null; }
+
+require_owner() {
+    local owner
+    owner=$(wcfg --get task.owner) || die "not initialised; run: task-git init"
+    [[ $owner == "$(me)" ]] && return 0
+    alive "$owner" && die "worktree owned by live session $owner; stop and ask the user"
+    die "owner $owner is gone; run task-git init to take over"
+}
+
+repo_slug() {
+    git remote get-url origin | sed -E 's#^.*[:/]([^/]+/[^/]+)$#\1#; s#\.git$##'
+}
+
+pr_url() { gh pr view "$(branch)" -R "$(repo_slug)" --json url --jq .url 2>/dev/null; }
+
+cmd_init() {
+    local owner
+    owner=$(wcfg --get task.owner 2>/dev/null)
+    if [[ -n $owner && $owner != "$(me)" ]] && alive "$owner"; then
+        die "worktree owned by live session $owner; stop and ask the user"
+    fi
+    git config extensions.worktreeConfig true
+    wcfg commit.gpgsign false
+    wcfg remote.origin.pushurl "https://x-access-token@github.com/$(repo_slug).git"
+    wcfg --replace-all credential.helper ""
+    # shellcheck disable=SC2016  # expanded by git when the helper runs
+    wcfg --add credential.helper '!f(){ echo username=x-access-token; echo "password=$(gh auth token)"; }; f'
+    wcfg task.owner "$(me)"
+    wcfg task.phase unsigned
+    log "initialised: owner $(me), phase unsigned, push over HTTPS"
+}
+
+cmd_push() {
+    require_owner
+    [[ $(wcfg --get task.phase) == signing ]] && die "signing in progress"
+    local b remote_sha
+    b=$(branch)
+    git fetch -q origin "$b" 2>/dev/null
+    remote_sha=$(git rev-parse -q --verify "origin/$b")
+    git push --force-with-lease="$b:${remote_sha:-}" -u origin "$b"
+}
+
+cmd_sign() {
+    require_owner
+    local url b
+    b=$(branch)
+    url=$(pr_url) || die "no pull request for $b; open one first"
+    if [[ -n ${TASK_GIT_SIGN_CHECK:-} ]] && $TASK_GIT_SIGN_CHECK "$url"; then
+        log "all commits already signed"
+        wcfg task.phase signed; wcfg commit.gpgsign true
+        return 0
+    fi
+    [[ -n $(git status --porcelain --untracked-files=no) ]] && die "uncommitted changes; commit or stash first"
+    wcfg task.phase signing
+    key-agent-ensure || { wcfg task.phase unsigned; exit 1; }
+    sign-pull-request --force --push --no-redirect --skip-update-check "$url" || { wcfg task.phase unsigned; die "sign-pull-request failed"; }
+    git fetch -q origin "$b" && git reset -q --hard "origin/$b"
+    wcfg commit.gpgsign true
+    wcfg task.phase signed
+    log "signed; local $b reset to $(git rev-parse --short HEAD)"
+}
+
+cmd_status() {
+    local b local_sha remote_sha
+    b=$(branch)
+    git fetch -q origin "$b" 2>/dev/null
+    local_sha=$(git rev-parse --short HEAD)
+    remote_sha=$(git rev-parse -q --short --verify "origin/$b")
+    echo "branch:  $b"
+    echo "owner:   $(wcfg --get task.owner) (me: $(me))"
+    echo "phase:   $(wcfg --get task.phase)"
+    echo "signing: commit.gpgsign=$(git config --get commit.gpgsign)"
+    echo "pr:      $(pr_url)"
+    echo "local:   $local_sha  remote: ${remote_sha:-none}"
+}
+
+case ${1:-} in
+    init|push|sign|status) "cmd_$1" ;;
+    *) usage ;;
+esac
