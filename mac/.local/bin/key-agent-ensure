@@ -1,0 +1,112 @@
+#!/usr/bin/env bash
+# Make sure the 1Password SSH agent can sign with the git signing key.
+#
+# Usage: key-agent-ensure [command] [repo-dir]
+#   check-and-wait  (default) return at once if the key is listed, else wait;
+#              meant to run before any git operation:
+#              key-agent-ensure && git push
+#   check      key listed?  0 yes, 1 agent answers without it, 2 1Password
+#              not running, 124 agent hung
+#   restart    restart 1Password only if it is not running or hung
+#   authorize  sign a dummy payload so 1Password asks for approval; 0 granted
+#   wait       restart and authorize until granted, nagging the user with
+#              exponential backoff; gives up after WAIT_LIMIT seconds
+#
+# repo-dir selects which git user.signingkey to use (default: current dir).
+set -uo pipefail
+
+SOCK="$HOME/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
+PROBE_TIMEOUT=${PROBE_TIMEOUT:-2}
+SIGN_TIMEOUT=${SIGN_TIMEOUT:-60}
+WAIT_LIMIT=${WAIT_LIMIT:-7200}
+BACKOFF_START=${BACKOFF_START:-5}
+BACKOFF_MAX=${BACKOFF_MAX:-300}
+
+log() { echo "key-agent-ensure: $*" >&2; }
+
+# Read by agent sessions, so it states what to do next, not just what failed.
+away() {
+    cat >&2 <<EOF
+KEY AGENT UNAVAILABLE: $1
+The user is away from the desk and will be back soon to approve 1Password.
+Do not stop. Continue with all work that does not need the git key
+(edits, tests, lint, reading, drafting). Defer commit, rebase, push and fetch.
+Do not bypass signing. Retry later with: key-agent-ensure
+EOF
+}
+usage() { sed -n '2,16p' "$0" | sed 's/^# \{0,1\}//' >&2; exit 64; }
+
+agent() { SSH_AUTH_SOCK="$SOCK" timeout "$@"; }
+
+signing_key() {
+    local key
+    key=$(git -C "$1" config --get user.signingkey 2>/dev/null)
+    key=${key#key::}
+    [[ $key == ssh-* ]] || { log "no ssh user.signingkey in git config of $1"; exit 2; }
+    echo "$key"
+}
+
+cmd_check() {
+    pgrep -x 1Password >/dev/null || return 2
+    local keys rc
+    keys=$(agent "$PROBE_TIMEOUT" ssh-add -L 2>/dev/null)
+    rc=$?
+    [[ $rc -eq 124 ]] && return 124
+    grep -qF "$(awk '{print $2}' <<<"$KEY")" <<<"$keys"
+}
+
+cmd_restart() {
+    cmd_check
+    case $? in
+        2) log "1Password not running, starting it" ;;
+        124) log "agent hung, restarting 1Password"
+             pkill -x 1Password
+             for _ in {1..10}; do pgrep -x 1Password >/dev/null || break; sleep 1; done
+             pkill -9 -x 1Password 2>/dev/null ;;
+        *) return 0 ;;
+    esac
+    open -a 1Password
+    sleep 5
+}
+
+cmd_authorize() {
+    local pub rc
+    pub=$(mktemp)
+    echo "$KEY" >"$pub"
+    echo key-agent-ensure | agent "$SIGN_TIMEOUT" ssh-keygen -Y sign -n git -f "$pub" >/dev/null 2>&1
+    rc=$?
+    rm -f "$pub" "$pub.sig"
+    return $rc
+}
+
+nag() {
+    open -a 1Password
+    osascript -e 'display notification "Approve the SSH signing request" with title "1Password SSH agent" sound name "Glass"' 2>/dev/null
+}
+
+cmd_wait() {
+    local delay=$BACKOFF_START deadline=$((SECONDS + WAIT_LIMIT)) announced=
+    while :; do
+        cmd_restart
+        if cmd_authorize; then
+            log "signing key authorized"
+            return 0
+        fi
+        if ((SECONDS + delay > deadline)); then
+            away "not approved after ${WAIT_LIMIT}s of asking"
+            return 1
+        fi
+        [[ -n $announced ]] || { away "waiting up to ${WAIT_LIMIT}s for approval"; announced=1; }
+        log "not authorized yet, asking again in ${delay}s"
+        nag
+        sleep "$delay"
+        delay=$((delay * 2 > BACKOFF_MAX ? BACKOFF_MAX : delay * 2))
+    done
+}
+
+cmd_check-and-wait() { cmd_check || cmd_wait; }
+
+cmd=${1:-check-and-wait}
+case $cmd in check-and-wait|check|restart|authorize|wait) ;; *) usage ;; esac
+KEY=$(signing_key "${2:-.}") || exit 2
+"cmd_$cmd"
