@@ -254,3 +254,23 @@ unset _tool
 
 # Set console in vi mode
 set -o vi
+
+# Start a headroom compression proxy on port $1 if nothing listens there.
+# The first start loads a model and can take up to 60s.
+function _headroom_ensure_proxy {
+    local port=$1 i
+    nc -z 127.0.0.1 "$port" 2>/dev/null && return 0
+    HEADROOM_TELEMETRY=off headroom proxy --port "$port" --no-telemetry &>/tmp/headroom-proxy-"$port".log &
+    disown
+    for i in {1..120}; do nc -z 127.0.0.1 "$port" 2>/dev/null && break; sleep 0.5; done
+    nc -z 127.0.0.1 "$port" 2>/dev/null || { echo "headroom proxy failed, see /tmp/headroom-proxy-$port.log"; return 1; }
+}
+
+# pi through headroom for this run only. The headroom extension in
+# ~/.skills/pi reads HEADROOM_URL and points deepinfra at the proxy. Port 8788,
+# because `headroom wrap claude` owns 8787. headroom appends /v1 to the target.
+function hpi {
+    local port=${HEADROOM_PI_PORT:-8788}
+    OPENAI_TARGET_API_URL=https://api.deepinfra.com _headroom_ensure_proxy "$port" || return 1
+    HEADROOM_URL=http://127.0.0.1:$port pi "$@"
+}
