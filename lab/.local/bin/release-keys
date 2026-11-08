@@ -45,8 +45,8 @@ keep() {  # keep HOME FPR LABEL: encrypted backup and revocation certificate
   local home=$1 fpr=$2 label=$3 rev
   rev="$(mktemp -d)/revocation.asc"
   # Made first, so a failure leaves no backup half written.
-  if [[ -f $home/openpgp-revoc.d/$fpr.rev ]]; then
-    cp "$home/openpgp-revoc.d/$fpr.rev" "$rev"
+  if [[ -f $home/openpgp-revocs.d/$fpr.rev ]]; then
+    cp "$home/openpgp-revocs.d/$fpr.rev" "$rev"
   else
     revocation "$home" "$fpr" "$rev"
   fi
@@ -91,6 +91,10 @@ launchpad_key() {
   fpr=$(fingerprint "$home" "$name <$email>" || true)
   if [[ -n $fpr ]]; then
     echo "already in my keyring: $fpr"
+    # A key made by hand, or before the backup existed, still gets one: on
+    # 08-11-2026 the Launchpad key had none, and this branch used to skip it.
+    [[ -e $backup/launchpad-secret-key.asc.crypt && -e $backup/launchpad-revocation.asc.crypt ]] \
+      || keep "$home" "$fpr" launchpad
   else
     gpg --quick-generate-key "$name <$email>" rsa4096 sign 3y   # asks for its passphrase
     fpr=$(fingerprint "$home" "$name <$email>")
