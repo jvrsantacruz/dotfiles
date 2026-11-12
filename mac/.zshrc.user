@@ -113,16 +113,21 @@ export PI_SUBAGENTS_WORKTREE_DIR="$HOME/.pi/agent/worktrees"
 export PI_RESEARCH_WEB_MAX_SEARCHES_PER_SESSION=32
 
 # sesh - agent session navigator
-# Bare `sesh` opens the fzf picker; the resume command of the picked session
-# lands on the command line, ready to enter. With arguments, calls the binary.
+# `sesh [text]` opens the fzf picker, in full text search over the text if
+# given; the resume command of the picked session lands on the command line,
+# ready to enter. Every other use prints as the binary does.
 sesh() {
-  if [[ $# -gt 0 ]]; then
-    command sesh "$@"
-    return
-  fi
-  local _id
-  _id=$(command sesh) || return
+  local _f _id _rc
+  _f=$(mktemp) || return
+  {
+    SESH_PICKED=$_f command sesh "$@"
+    _rc=$?
+    _id=$(<"$_f")
+  } always {
+    rm -f "$_f"
+  }
   [[ -n "$_id" ]] && print -z "$(command sesh resume --cd "$_id")"
+  return $_rc
 }
 
 # workon - project navigator
