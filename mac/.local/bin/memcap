@@ -1,0 +1,72 @@
+#!/usr/bin/env bash
+# Run a command and kill its whole process tree once the tree's resident
+# memory passes a limit, since macOS enforces no memory limit of its own.
+set -u
+
+usage() { echo "usage: memcap LIMIT[K|M|G] CMD [ARGS...]" >&2; exit 64; }
+
+to_kb() {
+  case $1 in
+    *G) echo $(( ${1%G} * 1048576 )) ;;
+    *M) echo $(( ${1%M} * 1024 )) ;;
+    *K) echo "${1%K}" ;;
+    *) return 1 ;;
+  esac
+}
+
+# Prints the pids of root and every descendant, with their RSS in KB.
+tree() {
+  ps -Ao pid=,ppid=,rss= | awk -v root="$1" '
+    { parent[$1] = $2; rss[$1] = $3 }
+    END {
+      for (p in parent) {
+        q = p
+        while (q != root && q in parent && q > 1) q = parent[q]
+        if (q == root) print p, rss[p]
+      }
+    }'
+}
+
+kill_tree() {
+  local pids
+  pids=$(tree "$1" | awk '{print $1}')
+  [ -n "$pids" ] || return 0
+  kill -TERM $pids 2>/dev/null
+  sleep 3
+  kill -KILL $(tree "$1" | awk '{print $1}') 2>/dev/null
+  return 0
+}
+
+self_test() {
+  local rc
+  "$0" 1G true || { echo "FAIL: clean exit not passed through" >&2; exit 1; }
+  "$0" 1G sh -c 'exit 7'; rc=$?
+  [ "$rc" -eq 7 ] || { echo "FAIL: exit code $rc, want 7" >&2; exit 1; }
+  MEMCAP_INTERVAL=1 "$0" 50M python3 -c 'b = bytearray(300_000_000); b[::4096] = b"x" * len(b[::4096]); import time; time.sleep(60)'
+  rc=$?
+  [ "$rc" -eq 137 ] || { echo "FAIL: over-limit tree not killed, exit $rc" >&2; exit 1; }
+  echo "memcap self-test ok"
+  exit 0
+}
+
+[ "${1:-}" = "--self-test" ] && self_test
+[ $# -ge 2 ] || usage
+limit_kb=$(to_kb "$1") || usage
+shift
+interval=${MEMCAP_INTERVAL:-5}
+
+"$@" &
+child=$!
+trap 'kill_tree "$child"; exit 143' TERM INT HUP
+
+while kill -0 "$child" 2>/dev/null; do
+  used=$(tree "$child" | awk '{s += $2} END {print s + 0}')
+  if [ "$used" -gt "$limit_kb" ]; then
+    echo "memcap: $1 tree at ${used}K over ${limit_kb}K, killing" >&2
+    kill_tree "$child"
+    wait "$child" 2>/dev/null
+    exit 137
+  fi
+  sleep "$interval"
+done
+wait "$child"
